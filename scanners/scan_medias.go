@@ -14,7 +14,7 @@ func ScanMedias(library *db.Library, conn *gorm.DB) {
 	conn.Model(&library).Association("Medias").Find(&medias)
 
 	for _, media := range medias {
-		if media.ParentMediaID == 0 {
+		if media.Type == "COLLECTION" {
 			log.Printf("Scan media collection for %v", media.EstimatedName)
 			found := scrapers.Scrap(media.EstimatedName)
 			conn.Model(&media).Updates(found)

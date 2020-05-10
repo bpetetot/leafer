@@ -37,7 +37,7 @@ func scrapAnilist(search string) db.Media {
 		TitleNative: media.Title.Native,
 		Description: media.Description,
 		Status:      media.Status,
-		Type:        "MANGA",
+		Category:    "MANGA",
 		Country:     media.Country,
 		CoverImage:  media.CoverImage.Large,
 		BannerImage: media.BannerImage,

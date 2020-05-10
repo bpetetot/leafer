@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/utils"
 	"github.com/jinzhu/gorm"
 )
 
@@ -40,7 +41,11 @@ func scanContent(path string, info os.FileInfo, library *db.Library, parentMedia
 
 			var curMedia *db.Media = parentMedia
 			if parentMedia == nil {
-				curMedia = &db.Media{Library: library, EstimatedName: file.Name()}
+				curMedia = &db.Media{
+					Type:          "COLLECTION",
+					EstimatedName: file.Name(),
+					Library:       library,
+				}
 				conn.Create(&curMedia)
 			}
 
@@ -64,18 +69,23 @@ func createMediaFromFile(path string, info os.FileInfo) (*db.Media, error) {
 		return nil, errors.New("does not match to analyzed extensions")
 	}
 
+	// get basic file info
 	basename := info.Name()
 	extension := filepath.Ext(basename)
 	name := strings.TrimSuffix(basename, extension)
 	volume, _ := strconv.Atoi(getVolumeNumber(name))
 
+	// get media info from file
+	zipFilesList, _ := utils.ListImagesInZip(path)
+
 	return &db.Media{
+		Type:          "MEDIA",
 		EstimatedName: getVolumeName(name),
 		Volume:        volume,
-		FilePath:      filepath.Join(path, basename),
-		FileDir:       path,
+		FilePath:      path,
 		FileName:      basename,
 		FileExtension: extension,
+		PageCount:     len(zipFilesList),
 	}, nil
 }
 

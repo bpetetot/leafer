@@ -16,7 +16,8 @@ type Library struct {
 
 // Media model
 type Media struct {
-	ID uint `json:"id" gorm:"primary_key"`
+	ID   uint   `json:"id" gorm:"primary_key"`
+	Type string `json:"type,omitempty"`
 
 	LibraryID uint     `json:"-"`
 	Library   *Library `json:"-"`
@@ -26,7 +27,7 @@ type Media struct {
 
 	Title       string `json:"title,omitempty"`
 	TitleNative string `json:"titleNative,omitempty"`
-	Type        string `json:"type,omitempty"`
+	Category    string `json:"category,omitempty"`
 	Volume      int    `json:"volume,omitempty"`
 	Description string `json:"description,omitempty"`
 	Status      string `json:"status,omitempty"`
@@ -40,12 +41,16 @@ type Media struct {
 
 	EstimatedName string `json:"estimatedName,omitempty"`
 	FilePath      string `json:"filePath,omitempty"`
-	FileDir       string `json:"fileDir,omitempty"`
 	FileName      string `json:"fileName,omitempty"`
 	FileExtension string `json:"fileExtention,omitempty"`
+	PageCount     int    `json:"pageCount,omitempty"`
 
 	Medias *[]Media `json:"medias,omitempty" gorm:"-"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// FileMetadata media metadata content
+type FileMetadata struct {
 }
