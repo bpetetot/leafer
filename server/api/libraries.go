@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
-	models "github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/db"
 )
 
 // CreateLibraryInput struct to add a new library with validation
@@ -23,17 +23,38 @@ type UpdateLibraryInput struct {
 
 // ListLibraries GET /libraries
 func ListLibraries(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	conn := c.MustGet("db").(*gorm.DB)
 
-	var libraries []models.Library
-	db.Find(&libraries)
+	var libraries []db.Library
+	conn.Find(&libraries)
 
 	c.JSON(http.StatusOK, gin.H{"data": libraries})
 }
 
+// FindLibrary GET /libraries/:id
+func FindLibrary(c *gin.Context) {
+	conn := c.MustGet("db").(*gorm.DB)
+
+	var library db.Library
+	var query = conn.Where("id = ?", c.Param("id")).First(&library)
+
+	if query.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
+		return
+	}
+
+	var medias []db.Media
+	var id = c.Param("id")
+	conn.Where("library_id = ? AND parent_media_id = ?", id, 0).Find(&medias)
+
+	library.Medias = &medias
+
+	c.JSON(http.StatusOK, gin.H{"data": library})
+}
+
 // CreateLibrary POST /libraries
 func CreateLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	conn := c.MustGet("db").(*gorm.DB)
 
 	var input CreateLibraryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -41,33 +62,18 @@ func CreateLibrary(c *gin.Context) {
 		return
 	}
 
-	library := models.Library{Name: input.Name, Path: input.Path}
-	db.Create(&library)
-
-	c.JSON(http.StatusOK, gin.H{"data": library})
-}
-
-// FindLibrary GET /libraries/:id
-func FindLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
-
-	var library models.Library
-	var query = db.Where("id = ?", c.Param("id")).First(&library)
-
-	if query.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
-	}
+	library := db.Library{Name: input.Name, Path: input.Path}
+	conn.Create(&library)
 
 	c.JSON(http.StatusOK, gin.H{"data": library})
 }
 
 // UpdateLibrary update the given library
 func UpdateLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	conn := c.MustGet("db").(*gorm.DB)
 
-	var library models.Library
-	var query = db.Where("id = ?", c.Param("id")).First(&library)
+	var library db.Library
+	var query = conn.Where("id = ?", c.Param("id")).First(&library)
 
 	if query.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
@@ -80,24 +86,24 @@ func UpdateLibrary(c *gin.Context) {
 		return
 	}
 
-	db.Model(&library).Updates(input)
+	conn.Model(&library).Updates(input)
 
 	c.JSON(http.StatusOK, gin.H{"data": library})
 }
 
 // DeleteLibrary delete the given library
 func DeleteLibrary(c *gin.Context) {
-	db := c.MustGet("db").(*gorm.DB)
+	conn := c.MustGet("db").(*gorm.DB)
 
-	var library models.Library
-	var query = db.Where("id = ?", c.Param("id")).First(&library)
+	var library db.Library
+	var query = conn.Where("id = ?", c.Param("id")).First(&library)
 
 	if query.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
 
-	db.Delete(&library)
+	db.DeleteLibrary(&library, conn)
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }

@@ -18,6 +18,7 @@ func Setup() *gorm.DB {
 	}
 
 	db.AutoMigrate(&Library{})
+	db.AutoMigrate(&Media{})
 
 	return db
 }
