@@ -1,0 +1,25 @@
+*, :after, :before {
+  box-sizing: border-box;
+  border: 0 solid #d2d6dc;
+}
+
+body {
+  background-color: #f4f5f7;
+  font-family: 'Open Sans', sans-serif;
+  line-height: 1.5;
+}
+
+button {
+  cursor: pointer;
+  background-color: transparent;
+  line-height: inherit;
+}
+
+a {
+  color: #5850ec;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #362f78;
+}
