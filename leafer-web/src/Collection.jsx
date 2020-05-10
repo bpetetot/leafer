@@ -13,23 +13,23 @@ const fetcher = (...args) =>
 function Collection() {
   let { libraryId, collectionId } = useParams()
   const { data } = useSWR(
-    `/api/libraries/${libraryId}/collections/${collectionId}`,
+    `/api/media/${collectionId}`,
     fetcher
   )
 
   if (!data) return <p>Loading...</p>
-  const { collection } = data
+  const { data: media } = data
   return (
     <>
-      <Header title={collection.title}>
+      <Header title={media.title}>
         <Link to={`/library/${libraryId}`}>Back</Link>
       </Header>
       <PageContainer>
         <div style={{ display: 'flex' }}>
           <div style={{ maxWidth: '20%' }}>
             <img
-              src={collection.coverImage.large}
-              alt={collection.title}
+              src={media.coverImage}
+              alt={media.title || media.titleNative}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
@@ -53,19 +53,19 @@ function Collection() {
                 marginBottom: '2rem',
               }}
             >
-              {collection.title}
+              {media.title || media.titleNative}
             </h1>
-            <p dangerouslySetInnerHTML={{ __html: collection.description }} />
+            <p dangerouslySetInnerHTML={{ __html: media.description }} />
           </div>
         </div>
         <h2 style={{ marginTop: '2rem' }}>
-          {collection.books.length} book(s)
+          {media.medias.length} book(s)
         </h2>
         <List>
-          {collection.books.map((book) => (
+          {media.medias.map((book) => (
             <ListItem key={book.id}>
               <Link to={`/library/${libraryId}/book/${book.id}`}>
-                {book.tomeName} #{String(book.tomeNumber).padStart(3, '0')}
+                #{String(book.volume).padStart(3, '0')} {book.fileName}
               </Link>
             </ListItem>
           ))}

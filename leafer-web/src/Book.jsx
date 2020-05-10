@@ -20,30 +20,29 @@ function useURLPageIndex() {
 
 function Book() {
   const pageIndex = useURLPageIndex()
-  const { libraryId, bookId } = useParams()
+  const { bookId } = useParams()
   const [loading, setLoading] = useState(true)
-  const [files, setFiles] = useState([])
+  const [pageCount, setPageCount] = useState(0)
   const { pathname } = useLocation()
 
   useEffect(() => {
-    fetch(`/api/libraries/${libraryId}/book/${bookId}`)
+    fetch(`/api/media/${bookId}`)
       .then((response) => response.json())
-      .then((files) => {
+      .then((json) => {
         setLoading(false)
-        setFiles(files)
+        setPageCount(json.data.pageCount)
       })
-  }, [libraryId, bookId])
+  }, [bookId])
 
   const loadImage = useCallback(
     (index) => {
-      if (!files || files.length === 0) return Promise.resolve()
-      const url = `/api/libraries/${libraryId}/book/${bookId}/file/${files[index]}`
+      const url = `/api/media/${bookId}/content?page=${index}`
       return fetch(url)
         .catch(() => (window.location.href = '/lost-in-space'))
         .then((response) => response.arrayBuffer())
         .then((buffer) => `data:image/*;base64, ${arrayBufferToBase64(buffer)}`)
     },
-    [libraryId, bookId, files]
+    [bookId]
   )
 
   const onHandlePageChanged = useCallback(
@@ -61,7 +60,7 @@ function Book() {
       <PageContainer>
         <Reader
           pageIndex={pageIndex}
-          pageCount={files.length}
+          pageCount={pageCount}
           loadPage={loadImage}
           onPageChanged={onHandlePageChanged}
         />

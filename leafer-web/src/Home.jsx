@@ -20,7 +20,7 @@ function Home() {
       })
       mutate({
         ...data,
-        libraries: data.libraries.filter((lib) => lib.id !== id),
+        libraries: data.filter((lib) => lib.id !== id),
       })
     },
     [data, mutate]
@@ -31,7 +31,7 @@ function Home() {
       <Header title="Libraries" />
       <PageContainer>
         <List>
-          {data?.libraries.map(({ id, path }) => (
+          {data?.data.map(({ id, path }) => (
             <ListItem key={id}>
               <Link to={`/library/${id}`}>{path}</Link>
               <button onClick={() => removeLibrary(id)}>Remove</button>

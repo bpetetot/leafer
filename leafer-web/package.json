@@ -8,7 +8,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test"
   },
-  "proxy": "http://localhost:4000",
+  "proxy": "http://localhost:8888",
   "dependencies": {
     "@emotion/core": "^10.0.28",
     "@emotion/styled": "^10.0.27",

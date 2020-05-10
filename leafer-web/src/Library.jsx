@@ -21,13 +21,13 @@ function Library() {
       </Header>
       <PageContainer>
         <Grid>
-          {data?.library?.collections?.map((collection) => (
+          {data?.data?.medias?.map((collection) => (
             <GridItem key={collection.id}>
               <Link to={`/library/${libraryId}/collection/${collection.id}`}>
                 <div
                   style={{
                     height: '224px',
-                    background: `no-repeat url(${collection.coverImage.large})`,
+                    background: `no-repeat url(${collection.coverImage})`,
                     backgroundSize: 'cover',
                   }}
                 />
@@ -41,16 +41,8 @@ function Library() {
                 }}
               >
                 <Link to={`/library/${libraryId}/collection/${collection.id}`}>
-                  {collection.title}
+                  {collection.title || collection.titleNative}
                 </Link>
-                <p
-                  style={{
-                    fontSize: '0.8rem',
-                    color: '#6b7280',
-                  }}
-                >
-                  {collection.books.length} books
-                </p>
               </div>
             </GridItem>
           ))}
