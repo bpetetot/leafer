@@ -93,9 +93,6 @@ function Reader({
           Next
         </button>
       </div>
-      {/* <div className="message">
-        {currentPageIndex + 1} / {pageCount}
-      </div> */}
     </div>
   )
 }

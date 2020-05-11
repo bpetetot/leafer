@@ -8,7 +8,7 @@ import { fetchBase64, history, fetchJSON } from './utils'
 import { useQueryParam } from './useQueryParam'
 import useSWR from 'swr'
 
-function Media() {
+function MediaReader() {
   const { mediaId } = useParams()
   const pageIndex = parseInt(useQueryParam('page', 0))
   const { pathname } = useLocation()
@@ -41,4 +41,4 @@ function Media() {
   )
 }
 
-export default Media
+export default MediaReader

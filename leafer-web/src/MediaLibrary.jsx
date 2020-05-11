@@ -19,13 +19,13 @@ function MediaLibrary() {
       </Header>
       <PageContainer>
         <Grid>
-          {library?.medias?.map((collection) => (
-            <GridItem key={collection.id}>
-              <Link to={`/library/${libraryId}/${collection.id}`}>
+          {library?.medias?.map((media) => (
+            <GridItem key={media.id}>
+              <Link to={`/library/${libraryId}/${media.id}`}>
                 <div
                   style={{
                     height: '224px',
-                    background: `no-repeat url(${collection.coverImage})`,
+                    background: `no-repeat url(${media.coverImage})`,
                     backgroundSize: 'cover',
                   }}
                 />
@@ -38,17 +38,19 @@ function MediaLibrary() {
                   textOverflow: 'ellipsis',
                 }}
               >
-                <Link to={`/library/${libraryId}/${collection.id}`}>
-                  {collection.title || collection.titleNative}
+                <Link to={`/library/${libraryId}/${media.id}`}>
+                  {media.title}
                 </Link>
-                <p
-                  style={{
-                    fontSize: '0.8rem',
-                    color: '#6b7280',
-                  }}
-                >
-                  {collection.mediaCount} media
-                </p>
+                {media.type === 'COLLECTION' && (
+                  <p
+                    style={{
+                      fontSize: '0.8rem',
+                      color: '#6b7280',
+                    }}
+                  >
+                    {media.mediaCount} media
+                  </p>
+                )}
               </div>
             </GridItem>
           ))}

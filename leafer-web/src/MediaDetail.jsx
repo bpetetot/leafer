@@ -6,23 +6,26 @@ import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
 import { fetchJSON } from './utils'
 
-function MediaCollection() {
+function MediaDetail() {
   let { libraryId, collectionId } = useParams()
   const { data } = useSWR(`/api/media/${collectionId}`, fetchJSON)
 
   if (!data) return <p>Loading...</p>
-  const { data: collection } = data
+  const { data: media } = data
+
+  const medias = media.type === 'COLLECTION' ? media.medias : [media]
+
   return (
     <>
-      <Header title={collection.title || collection.titleNative}>
+      <Header title={media.title}>
         <Link to={`/library/${libraryId}`}>Back</Link>
       </Header>
       <PageContainer>
         <div style={{ display: 'flex' }}>
           <div style={{ maxWidth: '20%' }}>
             <img
-              src={collection.coverImage}
-              alt={collection.title || collection.titleNative}
+              src={media.coverImage}
+              alt={media.title || media.titleNative}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
@@ -46,19 +49,19 @@ function MediaCollection() {
                 marginBottom: '2rem',
               }}
             >
-              {collection.title || collection.titleNative}
+              {media.title}
             </h1>
-            <p dangerouslySetInnerHTML={{ __html: collection.description }} />
+            <p dangerouslySetInnerHTML={{ __html: media.description }} />
           </div>
         </div>
-        <h2 style={{ marginTop: '2rem' }}>{collection.mediaCount} media</h2>
+        {media.mediaCount && (
+          <h2 style={{ marginTop: '2rem' }}>{media.mediaCount} media</h2>
+        )}
         <List>
-          {collection.medias.map((media) => (
+          {medias.map((media) => (
             <ListItem key={media.id}>
-              <Link
-                to={`/library/${libraryId}/${collectionId}/${media.id}`}
-              >
-                #{String(media.volume).padStart(3, '0')} {media.fileName} "{media.mediaIndex}"
+              <Link to={`/library/${libraryId}/${collectionId}/${media.id}`}>
+                #{String(media.volume || 0).padStart(3, '0')} {media.fileName}
               </Link>
             </ListItem>
           ))}
@@ -68,4 +71,4 @@ function MediaCollection() {
   )
 }
 
-export default MediaCollection
+export default MediaDetail
