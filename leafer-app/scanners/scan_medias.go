@@ -10,11 +10,13 @@ import (
 
 // ScanMedias scans medias from database to get metadata info
 func ScanMedias(library *db.Library, conn *gorm.DB) {
+	log.Printf("Scan media for library '%s' [%s]", library.Name, library.Path)
+
 	var medias []db.Media
 	conn.Model(&library).Association("Medias").Find(&medias)
 
 	for _, media := range medias {
-		if media.Type == "COLLECTION" {
+		if media.ParentMediaID == 0 {
 			log.Printf("Scan media collection for %v", media.EstimatedName)
 			found := scrapers.Scrap(media.EstimatedName)
 			conn.Model(&media).Updates(found)

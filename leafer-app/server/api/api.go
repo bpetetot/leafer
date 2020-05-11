@@ -14,6 +14,7 @@ func Routes(route string, router *gin.Engine) {
 	api.PATCH("/libraries/:id", UpdateLibrary)
 	api.DELETE("/libraries/:id", DeleteLibrary)
 
+	api.GET("/media", SearchMedia)
 	api.GET("/media/:id", GetMedia)
 	api.GET("/media/:id/content", GetMediaContent)
 }

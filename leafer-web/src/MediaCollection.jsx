@@ -51,14 +51,14 @@ function MediaCollection() {
             <p dangerouslySetInnerHTML={{ __html: collection.description }} />
           </div>
         </div>
-        <h2 style={{ marginTop: '2rem' }}>{collection.medias.length} book(s)</h2>
+        <h2 style={{ marginTop: '2rem' }}>{collection.mediaCount} media</h2>
         <List>
           {collection.medias.map((media) => (
             <ListItem key={media.id}>
               <Link
                 to={`/library/${libraryId}/${collectionId}/${media.id}`}
               >
-                #{String(media.volume).padStart(3, '0')} {media.fileName}
+                #{String(media.volume).padStart(3, '0')} {media.fileName} "{media.mediaIndex}"
               </Link>
             </ListItem>
           ))}

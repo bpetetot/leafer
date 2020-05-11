@@ -41,6 +41,14 @@ function MediaLibrary() {
                 <Link to={`/library/${libraryId}/${collection.id}`}>
                   {collection.title || collection.titleNative}
                 </Link>
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    color: '#6b7280',
+                  }}
+                >
+                  {collection.mediaCount} media
+                </p>
               </div>
             </GridItem>
           ))}

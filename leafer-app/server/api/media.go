@@ -11,6 +11,47 @@ import (
 	"github.com/bpetetot/leafer/utils"
 )
 
+// SearchMedia search media corresponding to given query parameters
+// valid query parameters are:
+// - libraryId
+// - parentMediaId
+// - mediaType
+// - mediaIndex
+func SearchMedia(c *gin.Context) {
+	conn := c.MustGet("db").(*gorm.DB)
+
+	var libraryID = c.Query("libraryId")
+	if libraryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "LibraryId is mandatory"})
+		return
+	}
+	conn = conn.Where("library_id = ?", libraryID)
+
+	var parentMediaID = c.Query("parentMediaId")
+	if parentMediaID != "" {
+		conn = conn.Where("parent_media_id = ?", parentMediaID)
+	}
+
+	var mediaType = c.Query("mediaType")
+	if mediaType != "" {
+		conn = conn.Where("type = ?", mediaType)
+	}
+
+	var mediaIndex = c.Query("mediaIndex")
+	if mediaIndex != "" {
+		conn = conn.Where("media_index = ?", mediaIndex)
+	}
+
+	var medias []db.Media
+	var queryMedia = conn.Find(&medias)
+	if queryMedia.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "error searching for media"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": medias})
+}
+
 // GetMedia get media info dependening on its type
 func GetMedia(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
@@ -25,7 +66,7 @@ func GetMedia(c *gin.Context) {
 
 	if media.Type == "COLLECTION" {
 		var medias []db.Media
-		conn.Where("parent_media_id = ?", id).Find(&medias)
+		conn.Where("parent_media_id = ?", id).Order("volume").Find(&medias)
 		media.Medias = &medias
 	}
 
@@ -49,7 +90,7 @@ func GetMediaContent(c *gin.Context) {
 		pageIndex = 0
 	}
 
-	err = utils.StreamImageFromZip(media.FilePath, pageIndex, c.Writer)
+	err = utils.StreamImageFromZip(media.Path, pageIndex, c.Writer)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
 		return

@@ -44,7 +44,7 @@ func main() {
 				// var library db.Library
 				// conn.First(&library)
 
-				scanners.ScanFiles(&library, conn)
+				scanners.ScanLibrary(&library, conn)
 				scanners.ScanMedias(&library, conn)
 				return nil
 			},

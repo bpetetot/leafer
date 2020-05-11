@@ -1,8 +1,8 @@
 package scanners
 
 import (
-	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -14,59 +14,59 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// ScanFiles scans all files from a library
-func ScanFiles(library *db.Library, conn *gorm.DB) error {
-	root, err := os.Stat(library.Path)
-	if err != nil {
-		return errors.New("the library path does not exist anymore")
-	}
-
+// ScanLibrary scans all files from a library
+func ScanLibrary(library *db.Library, conn *gorm.DB) {
+	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
 	db.DeleteLibraryContent(library, conn)
-
-	scanContent(library.Path, root, library, nil, conn)
-
-	return nil
+	scanDirectory(library.Path, library, nil, 0, conn)
 }
 
-func scanContent(path string, info os.FileInfo, library *db.Library, parentMedia *db.Media, conn *gorm.DB) {
-	if info.IsDir() {
-		files, _ := ioutil.ReadDir(path)
-		for _, file := range files {
-			filename := file.Name()
-			newPath := filepath.Join(path, filename)
-
-			if filename[0:1] == "." {
-				continue
-			}
-
-			var curMedia *db.Media = parentMedia
-			if parentMedia == nil {
-				curMedia = &db.Media{
-					Type:          "COLLECTION",
-					EstimatedName: file.Name(),
-					Library:       library,
-				}
-				conn.Create(&curMedia)
-			}
-
-			scanContent(newPath, file, library, curMedia, conn)
-		}
-	} else {
-		media, err := createMediaFromFile(path, info)
-		if err != nil {
-			return
-		}
-
-		media.Library = library
-		media.ParentMedia = parentMedia
-		conn.Create(&media)
+func scanDirectory(path string, library *db.Library, parentMedia *db.Media, mediaIndex int, conn *gorm.DB) int {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return 0
 	}
+
+	utils.SortFiles(files)
+	for _, file := range files {
+		if file.Name()[0:1] == "." {
+			continue
+		}
+
+		newPath := filepath.Join(path, file.Name())
+		if file.IsDir() {
+			collection := createCollection(newPath, file, library, conn)
+
+			if collection != nil {
+				mediaCount := scanDirectory(newPath, library, collection, 0, conn)
+
+				conn.Model(&collection).Update(db.Media{MediaCount: mediaCount})
+
+				log.Printf("[%s] %v media", newPath, mediaCount)
+			}
+		} else {
+			mediaIndex++
+			createMedia(newPath, file, library, parentMedia, mediaIndex, conn)
+		}
+	}
+	return mediaIndex
 }
 
-func createMediaFromFile(path string, info os.FileInfo) (*db.Media, error) {
+func createCollection(path string, info os.FileInfo, library *db.Library, conn *gorm.DB) *db.Media {
+	collection := &db.Media{
+		Type:          "COLLECTION",
+		Library:       library,
+		Path:          path,
+		EstimatedName: info.Name(),
+	}
+	conn.Create(&collection)
+	return collection
+}
+
+func createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int, conn *gorm.DB) {
 	matched, err := filepath.Match("*.zip", info.Name())
 	if !matched || err != nil {
-		return nil, errors.New("does not match to analyzed extensions")
+		return
 	}
 
 	// get basic file info
@@ -78,15 +78,19 @@ func createMediaFromFile(path string, info os.FileInfo) (*db.Media, error) {
 	// get media info from file
 	zipFilesList, _ := utils.ListImagesInZip(path)
 
-	return &db.Media{
+	media := &db.Media{
 		Type:          "MEDIA",
+		Library:       library,
+		ParentMedia:   collection,
+		Path:          path,
+		MediaIndex:    mediaIndex,
 		EstimatedName: getVolumeName(name),
-		Volume:        volume,
-		FilePath:      path,
 		FileName:      basename,
 		FileExtension: extension,
+		Volume:        volume,
 		PageCount:     len(zipFilesList),
-	}, nil
+	}
+	conn.Create(&media)
 }
 
 func getVolumeNumber(filename string) string {

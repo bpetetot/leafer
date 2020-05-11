@@ -1,5 +1,7 @@
 package scrapers
 
+// https://anilist.gitbook.io/anilist-apiv2-docs
+
 import (
 	"encoding/json"
 
@@ -8,8 +10,6 @@ import (
 )
 
 const anilistURL = "https://graphql.anilist.co"
-
-// https://anilist.gitbook.io/anilist-apiv2-docs
 
 func scrapAnilist(search string) db.Media {
 	client := resty.New()
@@ -33,20 +33,30 @@ func scrapAnilist(search string) db.Media {
 	var media = jsonResult.Data.Media
 
 	return db.Media{
-		Title:       media.Title.English,
-		TitleNative: media.Title.Native,
+		Title:       getTitle(media.Title),
 		Description: media.Description,
-		Status:      media.Status,
 		Category:    "MANGA",
 		Country:     media.Country,
 		CoverImage:  media.CoverImage.Large,
 		BannerImage: media.BannerImage,
 		Score:       media.Score,
-		// Synonyms: media.Synonyms[0]
 		// Genre:       media.Genres[0],
 		// StartDate:   media.StartDate,
 		// EndDate:     media.EndDate,
 	}
+}
+
+// Utils functions
+
+func getTitle(title resultMediaTitle) string {
+	if title.English != "" {
+		return title.English
+	} else if title.UserPreferred != "" {
+		return title.UserPreferred
+	} else if title.UserPreferred != "" {
+		return title.Romaji
+	}
+	return title.Native
 }
 
 // GraphQL body for Anilist API
