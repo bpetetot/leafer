@@ -13,6 +13,7 @@ const swipeConfig = {
 }
 
 function Reader({
+  id,
   pageIndex = 0,
   pageCount,
   loadPage,
@@ -20,7 +21,6 @@ function Reader({
   displayMode,
 }) {
   const [page, setPage] = useState(null)
-  const [currentPageIndex, setCurrentPageIndex] = useState(pageIndex)
   const cache = useRef([])
 
   const handleLoadPage = useCallback(
@@ -36,35 +36,35 @@ function Reader({
     [loadPage, pageCount]
   )
 
-  useEffect(() => setCurrentPageIndex(pageIndex), [pageIndex])
+  useEffect(() => { 
+    cache.current = []
+  }, [id])
 
   useEffect(() => {
     // avoid loading if page in cache
-    if (!cache.current[currentPageIndex]) {
+    if (!cache.current[pageIndex]) {
       setPage(undefined)
     }
     // load current page
-    handleLoadPage(currentPageIndex)
+    handleLoadPage(pageIndex)
       .then(setPage)
       .then(() => {
         // load next page in cache
-        handleLoadPage(currentPageIndex + 1)
+        handleLoadPage(pageIndex + 1)
       })
-  }, [handleLoadPage, currentPageIndex])
+  }, [handleLoadPage, pageIndex])
 
   const nextPage = () => {
-    if (currentPageIndex === null) return
-    const nextIndex = currentPageIndex + 1
+    if (pageIndex === null) return
+    const nextIndex = pageIndex + 1
     if (nextIndex >= pageCount) return
-    setCurrentPageIndex(nextIndex)
     if (onPageChanged) onPageChanged(nextIndex)
   }
 
   const previousPage = () => {
-    if (currentPageIndex === null) return
-    const previousIndex = currentPageIndex - 1
+    if (pageIndex === null) return
+    const previousIndex = pageIndex - 1
     if (previousIndex < 0) return
-    setCurrentPageIndex(previousIndex)
     if (onPageChanged) onPageChanged(previousIndex)
   }
 

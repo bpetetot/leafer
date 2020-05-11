@@ -17,7 +17,3 @@ function arrayBufferToBase64(buffer) {
   bytes.forEach((b) => (binary += String.fromCharCode(b)))
   return window.btoa(binary)
 }
-
-export const history = {
-  push: (url) => window.history.pushState(null, '', url),
-}
