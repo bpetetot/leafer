@@ -4,32 +4,25 @@ import useSWR from 'swr'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
+import { fetchJSON } from './utils'
 
-const fetcher = (...args) =>
-  fetch(...args)
-    .then((res) => res.json())
-    .catch(() => (window.location.href = '/lost-in-space'))
-
-function Collection() {
+function MediaCollection() {
   let { libraryId, collectionId } = useParams()
-  const { data } = useSWR(
-    `/api/media/${collectionId}`,
-    fetcher
-  )
+  const { data } = useSWR(`/api/media/${collectionId}`, fetchJSON)
 
   if (!data) return <p>Loading...</p>
-  const { data: media } = data
+  const { data: collection } = data
   return (
     <>
-      <Header title={media.title}>
+      <Header title={collection.title || collection.titleNative}>
         <Link to={`/library/${libraryId}`}>Back</Link>
       </Header>
       <PageContainer>
         <div style={{ display: 'flex' }}>
           <div style={{ maxWidth: '20%' }}>
             <img
-              src={media.coverImage}
-              alt={media.title || media.titleNative}
+              src={collection.coverImage}
+              alt={collection.title || collection.titleNative}
               style={{
                 maxWidth: '100%',
                 maxHeight: '100%',
@@ -53,19 +46,19 @@ function Collection() {
                 marginBottom: '2rem',
               }}
             >
-              {media.title || media.titleNative}
+              {collection.title || collection.titleNative}
             </h1>
-            <p dangerouslySetInnerHTML={{ __html: media.description }} />
+            <p dangerouslySetInnerHTML={{ __html: collection.description }} />
           </div>
         </div>
-        <h2 style={{ marginTop: '2rem' }}>
-          {media.medias.length} book(s)
-        </h2>
+        <h2 style={{ marginTop: '2rem' }}>{collection.medias.length} book(s)</h2>
         <List>
-          {media.medias.map((book) => (
-            <ListItem key={book.id}>
-              <Link to={`/library/${libraryId}/book/${book.id}`}>
-                #{String(book.volume).padStart(3, '0')} {book.fileName}
+          {collection.medias.map((media) => (
+            <ListItem key={media.id}>
+              <Link
+                to={`/library/${libraryId}/${collectionId}/${media.id}`}
+              >
+                #{String(media.volume).padStart(3, '0')} {media.fileName}
               </Link>
             </ListItem>
           ))}
@@ -75,4 +68,4 @@ function Collection() {
   )
 }
 
-export default Collection
+export default MediaCollection

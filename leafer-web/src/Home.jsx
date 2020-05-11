@@ -4,14 +4,10 @@ import useSWR from 'swr'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
-
-const fetcher = (...args) =>
-  fetch(...args)
-    .then((res) => res.json())
-    .catch(() => (window.location.href = '/lost-in-space'))
+import { fetchJSON } from './utils'
 
 function Home() {
-  const { data, mutate } = useSWR('/api/libraries', fetcher)
+  const { data, mutate } = useSWR('/api/libraries', fetchJSON)
 
   const removeLibrary = useCallback(
     async (id) => {
@@ -20,7 +16,7 @@ function Home() {
       })
       mutate({
         ...data,
-        libraries: data.filter((lib) => lib.id !== id),
+        data: data.data.filter((lib) => lib.id !== id),
       })
     },
     [data, mutate]

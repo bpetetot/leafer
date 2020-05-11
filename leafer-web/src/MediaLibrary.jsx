@@ -4,26 +4,24 @@ import useSWR from 'swr'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import { Grid, GridItem } from './components/Grid'
+import { fetchJSON } from './utils'
 
-const fetcher = (...args) =>
-  fetch(...args)
-    .then((res) => res.json())
-    .catch(() => (window.location.href = '/lost-in-space'))
-
-function Library() {
+function MediaLibrary() {
   let { libraryId } = useParams()
-  const { data } = useSWR(`/api/libraries/${libraryId}`, fetcher)
+  const { data } = useSWR(`/api/libraries/${libraryId}`, fetchJSON)
 
+  if (!data) return <p>Loading...</p>
+  const { data: library } = data
   return (
     <>
-      <Header title={data?.library?.info?.path}>
+      <Header title={library.name}>
         <Link to="/">Back</Link>
       </Header>
       <PageContainer>
         <Grid>
-          {data?.data?.medias?.map((collection) => (
+          {library?.medias?.map((collection) => (
             <GridItem key={collection.id}>
-              <Link to={`/library/${libraryId}/collection/${collection.id}`}>
+              <Link to={`/library/${libraryId}/${collection.id}`}>
                 <div
                   style={{
                     height: '224px',
@@ -40,7 +38,7 @@ function Library() {
                   textOverflow: 'ellipsis',
                 }}
               >
-                <Link to={`/library/${libraryId}/collection/${collection.id}`}>
+                <Link to={`/library/${libraryId}/${collection.id}`}>
                   {collection.title || collection.titleNative}
                 </Link>
               </div>
@@ -52,4 +50,4 @@ function Library() {
   )
 }
 
-export default Library
+export default MediaLibrary
