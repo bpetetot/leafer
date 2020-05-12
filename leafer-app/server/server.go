@@ -15,7 +15,14 @@ func Start() {
 	port := os.Getenv("PORT")
 	router := gin.Default()
 
-	router.Use(db.Middleware)
+	DB := db.Setup()
+	defer DB.Close()
+
+	router.Use(func(c *gin.Context) {
+		c.Set("db", DB)
+		c.Next()
+	})
+
 	router.Use(static.Serve("/", static.LocalFile("./web", true)))
 
 	api.Routes("/api", router)
