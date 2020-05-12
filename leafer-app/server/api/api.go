@@ -13,6 +13,7 @@ func Routes(route string, router *gin.Engine) {
 	api.GET("/libraries/:id", FindLibrary)
 	api.PATCH("/libraries/:id", UpdateLibrary)
 	api.DELETE("/libraries/:id", DeleteLibrary)
+	api.GET("/libraries/:id/scan", ScanLibraryAsync)
 
 	api.GET("/media", SearchMedia)
 	api.GET("/media/:id", GetMedia)

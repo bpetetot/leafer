@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/scanners"
 )
 
 // CreateLibraryInput struct to add a new library with validation
@@ -104,6 +105,26 @@ func DeleteLibrary(c *gin.Context) {
 	}
 
 	db.DeleteLibrary(&library, conn)
+
+	c.JSON(http.StatusOK, gin.H{"data": true})
+}
+
+// ScanLibraryAsync scan files for the given library
+func ScanLibraryAsync(c *gin.Context) {
+	conn := c.MustGet("db").(*gorm.DB)
+
+	var library db.Library
+	var query = conn.Where("id = ?", c.Param("id")).First(&library)
+
+	if query.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
+		return
+	}
+
+	go func(library *db.Library, conn *gorm.DB) {
+		scanners.ScanLibrary(library, conn)
+		scanners.ScanMedias(library, conn)
+	}(&library, conn)
 
 	c.JSON(http.StatusOK, gin.H{"data": true})
 }
