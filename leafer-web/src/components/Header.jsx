@@ -22,6 +22,9 @@ const Header = ({title, children}) => {
 
 const styles = {
   header: css`
+    position: sticky;
+    top: 0;
+    z-index: 10;
     background-color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);
   `,
