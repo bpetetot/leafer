@@ -43,7 +43,7 @@ func SearchMedia(c *gin.Context) {
 	}
 
 	var medias []db.Media
-	var queryMedia = conn.Find(&medias)
+	var queryMedia = conn.Order("mediaIndex").Find(&medias)
 	if queryMedia.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "error searching for media"})
 		return
@@ -62,12 +62,6 @@ func GetMedia(c *gin.Context) {
 	if queryMedia.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
 		return
-	}
-
-	if media.Type == "COLLECTION" {
-		var medias []db.Media
-		conn.Where("parent_media_id = ?", id).Order("volume").Find(&medias)
-		media.Medias = &medias
 	}
 
 	c.JSON(http.StatusOK, media)

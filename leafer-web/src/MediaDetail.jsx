@@ -1,23 +1,20 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import Header from './components/Header'
+import Header from './layout/Header'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
-import { useMedia } from './services/media'
+import { useMedia, useMediasCollection } from './services/media'
 
 function MediaDetail() {
   let { libraryId, collectionId } = useParams()
   const { data: media } = useMedia(collectionId)
+  const { data: medias } = useMediasCollection(libraryId, media)
 
   if (!media) return <p>Loading...</p>
 
-  const medias = media.type === 'COLLECTION' ? media.medias : [media]
-
   return (
     <>
-      <Header title={media.title}>
-        <Link to={`/library/${libraryId}`}>Back</Link>
-      </Header>
+      <Header />
       <PageContainer>
         <div style={{ display: 'flex' }}>
           <div style={{ maxWidth: '20%' }}>
@@ -52,11 +49,8 @@ function MediaDetail() {
             <p dangerouslySetInnerHTML={{ __html: media.description }} />
           </div>
         </div>
-        {media.mediaCount && (
-          <h2 style={{ marginTop: '2rem' }}>{media.mediaCount} media</h2>
-        )}
         <List>
-          {medias.map((media) => (
+          {(medias?.data || [media])?.map((media) => (
             <ListItem key={media.id}>
               <Link to={`/library/${libraryId}/${collectionId}/${media.id}`}>
                 #{String(media.volume || 0).padStart(3, '0')} {media.fileName}

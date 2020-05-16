@@ -1,20 +1,18 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import Header from './components/Header'
+import Header from './layout/Header'
 import { PageContainer } from './components/Container'
 import { Grid, GridItem } from './components/Grid'
-import { useMediaLibrary } from './services/media'
+import { useMediasLibrary } from './services/media'
 
 function MediaLibrary() {
   let { libraryId } = useParams()
-  const { data: medias } = useMediaLibrary(libraryId)
+  const { data: medias } = useMediasLibrary(libraryId)
 
   if (!medias) return <p>Loading...</p>
   return (
     <>
-      <Header title="Library">
-        <Link to="/">Back</Link>
-      </Header>
+      <Header />
       <PageContainer>
         <Grid>
           {medias?.data?.map((media) => (

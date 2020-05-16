@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 
-import Header from './components/Header'
+import Header from './layout/Header'
 import { PageContainer } from './components/Container'
 import Reader from './Reader'
 import { useQueryParam } from './useQueryParam'
@@ -46,7 +46,7 @@ function MediaReader() {
 
   return (
     <>
-      <Header title={media?.fileName}>
+      <Header>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button onClick={() => handleChangeMedia(mediaIndex - 1)}>
             <PreviousMedia />

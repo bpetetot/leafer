@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import Header from './components/Header'
+import Header from './layout/Header'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
 import { useLibraries, removeLibrary } from './services/libraries'
