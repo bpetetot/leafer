@@ -55,17 +55,13 @@ function Reader({
   }, [handleLoadPage, pageIndex])
 
   const nextPage = () => {
-    if (pageIndex === null) return
     const nextIndex = pageIndex + 1
-    if (nextIndex >= pageCount) return
-    if (onPageChanged) onPageChanged(nextIndex)
+    onPageChanged(nextIndex)
   }
 
   const previousPage = () => {
-    if (pageIndex === null) return
     const previousIndex = pageIndex - 1
-    if (previousIndex < 0) return
-    if (onPageChanged) onPageChanged(previousIndex)
+    onPageChanged(previousIndex)
   }
 
   const handlers = useSwipeable({
@@ -80,18 +76,8 @@ function Reader({
 
   return (
     <div className={readerClassNames} {...handlers}>
-      <div className="action">
-        <button type="button" onClick={previousPage}>
-          Previous
-        </button>
-      </div>
       <div className="page">
         {page ? <img src={page} alt="Page X" /> : <p>Loading page...</p>}
-      </div>
-      <div className="action">
-        <button type="button" onClick={nextPage}>
-          Next
-        </button>
       </div>
     </div>
   )
