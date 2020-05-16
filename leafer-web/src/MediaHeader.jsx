@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 
-import { useLibrary } from '../services/libraries'
-import { useMedia } from '../services/media'
+import { useLibrary } from './services/libraries'
+import { useMedia } from './services/media'
+import Header from './components/Header'
 
 const Breadcrumb = () => {
   const { libraryId, collectionId, mediaId } = useParams()
@@ -43,4 +44,8 @@ const Breadcrumb = () => {
   )
 }
 
-export default Breadcrumb
+const MediaHeader = ({ children }) => (
+  <Header title={<Breadcrumb />}>{children}</Header>
+)
+
+export default MediaHeader

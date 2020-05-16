@@ -2,7 +2,6 @@
 import { css, jsx } from '@emotion/core'
 
 import {Container} from '../components/Container'
-import Breadcrumb from './Breadcrumb'
 
 const Header = ({title, children}) => {
   return (
@@ -10,7 +9,7 @@ const Header = ({title, children}) => {
       <Container>
         <div css={styles.content}>
           <div css={styles.left}>
-            {title ? title : <Breadcrumb />}
+            {title}
           </div>
           <div css={styles.right}>
             {children}

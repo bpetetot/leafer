@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import Header from './layout/Header'
+import MediaHeader from './MediaHeader'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
 import { useMedia, useMediasCollection } from './services/media'
@@ -14,7 +14,7 @@ function MediaDetail() {
 
   return (
     <>
-      <Header />
+      <MediaHeader />
       <PageContainer>
         <div style={{ display: 'flex' }}>
           <div style={{ maxWidth: '20%' }}>

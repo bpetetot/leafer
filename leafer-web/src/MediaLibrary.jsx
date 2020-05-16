@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import Header from './layout/Header'
+import MediaHeader from './MediaHeader'
 import { PageContainer } from './components/Container'
 import { Grid, GridItem } from './components/Grid'
 import { useMediasLibrary } from './services/media'
@@ -12,7 +12,7 @@ function MediaLibrary() {
   if (!medias) return <p>Loading...</p>
   return (
     <>
-      <Header />
+      <MediaHeader />
       <PageContainer>
         <Grid>
           {medias?.data?.map((media) => (
