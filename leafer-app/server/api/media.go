@@ -70,7 +70,7 @@ func GetMedia(c *gin.Context) {
 		media.Medias = &medias
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": media})
+	c.JSON(http.StatusOK, media)
 }
 
 // GetMediaContent return the media content

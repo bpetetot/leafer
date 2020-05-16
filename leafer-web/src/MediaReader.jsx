@@ -4,9 +4,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import Reader from './Reader'
-import { fetchJSON, fetchBase64 } from './utils'
 import { useQueryParam } from './useQueryParam'
-import useSWR from 'swr'
+import { fetchMediaByIndex, fetchMediaPage, useMedia } from './services/media'
 
 import { ReactComponent as NextIcon } from './assets/icons/chevron-right.svg'
 import { ReactComponent as NextMedia } from './assets/icons/chevrons-right.svg'
@@ -18,15 +17,14 @@ function MediaReader() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
-  const { data } = useSWR(`/api/media/${mediaId}`, fetchJSON)
-  const mediaIndex = data?.data?.mediaIndex || 0
-  const pageCount = data?.data?.pageCount || 0
+  const { data: media } = useMedia(mediaId)
+  const mediaIndex = media?.mediaIndex || 0
+  const pageCount = media?.pageCount || 0
   const pageIndex = parseInt(useQueryParam('page', 0))
 
-  const loadImage = useCallback(
-    (index) => fetchBase64(`/api/media/${mediaId}/content?page=${index}`),
-    [mediaId]
-  )
+  const loadImage = useCallback((index) => fetchMediaPage(mediaId, index), [
+    mediaId,
+  ])
 
   const handlePageChanged = useCallback(
     (pageIndex) => {
@@ -39,19 +37,16 @@ function MediaReader() {
 
   const handleChangeMedia = useCallback(
     async (index) => {
-      const url = `/api/media?libraryId=${libraryId}&parentMediaId=${collectionId}&mediaIndex=${index}`
-      const response = await fetchJSON(url)
-      const next = response?.data?.[0]
-      if (next) {
-        navigate(`/library/${libraryId}/${collectionId}/${next.id}`)
-      }
+      const next = await fetchMediaByIndex(libraryId, collectionId, index)
+      if (!next) return
+      navigate(`/library/${libraryId}/${collectionId}/${next.id}`)
     },
     [collectionId, libraryId, navigate]
   )
 
   return (
     <>
-      <Header title={data?.data?.fileName}>
+      <Header title={media?.fileName}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button onClick={() => handleChangeMedia(mediaIndex - 1)}>
             <PreviousMedia />

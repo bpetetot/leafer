@@ -1,12 +1,9 @@
 export function fetchJSON(...args) {
-  return fetch(...args)
-    .then((res) => res.json())
-    .catch(() => (window.location.href = '/lost-in-space'))
+  return fetch(...args).then((res) => res.json())
 }
 
 export function fetchBase64(...args) {
   return fetch(...args)
-    .catch(() => (window.location.href = '/lost-in-space'))
     .then((response) => response.arrayBuffer())
     .then((buffer) => `data:image/*;base64, ${arrayBufferToBase64(buffer)}`)
 }

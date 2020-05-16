@@ -1,25 +1,23 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import useSWR from 'swr'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import { Grid, GridItem } from './components/Grid'
-import { fetchJSON } from './utils'
+import { useMediaLibrary } from './services/media'
 
 function MediaLibrary() {
   let { libraryId } = useParams()
-  const { data } = useSWR(`/api/libraries/${libraryId}`, fetchJSON)
+  const { data: medias } = useMediaLibrary(libraryId)
 
-  if (!data) return <p>Loading...</p>
-  const { data: library } = data
+  if (!medias) return <p>Loading...</p>
   return (
     <>
-      <Header title={library.name}>
+      <Header title="Library">
         <Link to="/">Back</Link>
       </Header>
       <PageContainer>
         <Grid>
-          {library?.medias?.map((media) => (
+          {medias?.data?.map((media) => (
             <GridItem key={media.id}>
               <Link to={`/library/${libraryId}/${media.id}`}>
                 <div

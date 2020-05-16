@@ -1,17 +1,15 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
-import useSWR from 'swr'
 import Header from './components/Header'
 import { PageContainer } from './components/Container'
 import { List, ListItem } from './components/List'
-import { fetchJSON } from './utils'
+import { useMedia } from './services/media'
 
 function MediaDetail() {
   let { libraryId, collectionId } = useParams()
-  const { data } = useSWR(`/api/media/${collectionId}`, fetchJSON)
+  const { data: media } = useMedia(collectionId)
 
-  if (!data) return <p>Loading...</p>
-  const { data: media } = data
+  if (!media) return <p>Loading...</p>
 
   const medias = media.type === 'COLLECTION' ? media.medias : [media]
 

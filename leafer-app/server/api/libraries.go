@@ -29,7 +29,7 @@ func ListLibraries(c *gin.Context) {
 	var libraries []db.Library
 	conn.Find(&libraries)
 
-	c.JSON(http.StatusOK, gin.H{"data": libraries})
+	c.JSON(http.StatusOK, libraries)
 }
 
 // FindLibrary GET /libraries/:id
@@ -44,13 +44,7 @@ func FindLibrary(c *gin.Context) {
 		return
 	}
 
-	var medias []db.Media
-	var id = c.Param("id")
-	conn.Where("library_id = ? AND parent_media_id = ?", id, 0).Find(&medias)
-
-	library.Medias = &medias
-
-	c.JSON(http.StatusOK, gin.H{"data": library})
+	c.JSON(http.StatusOK, library)
 }
 
 // CreateLibrary POST /libraries
@@ -66,7 +60,7 @@ func CreateLibrary(c *gin.Context) {
 	library := db.Library{Name: input.Name, Path: input.Path}
 	conn.Create(&library)
 
-	c.JSON(http.StatusOK, gin.H{"data": library})
+	c.JSON(http.StatusOK, library)
 }
 
 // UpdateLibrary update the given library
@@ -89,7 +83,7 @@ func UpdateLibrary(c *gin.Context) {
 
 	conn.Model(&library).Updates(input)
 
-	c.JSON(http.StatusOK, gin.H{"data": library})
+	c.JSON(http.StatusOK, library)
 }
 
 // DeleteLibrary delete the given library
@@ -106,7 +100,7 @@ func DeleteLibrary(c *gin.Context) {
 
 	db.DeleteLibrary(&library, conn)
 
-	c.JSON(http.StatusOK, gin.H{"data": true})
+	c.JSON(http.StatusOK, gin.H{"status": "OK"})
 }
 
 // ScanLibraryAsync scan files for the given library
@@ -126,5 +120,5 @@ func ScanLibraryAsync(c *gin.Context) {
 		scanners.ScanMedias(library, conn)
 	}(&library, conn)
 
-	c.JSON(http.StatusOK, gin.H{"data": true})
+	c.JSON(http.StatusOK, gin.H{"status": "OK"})
 }
