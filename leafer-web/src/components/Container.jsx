@@ -1,26 +1,11 @@
-import styled from '@emotion/styled'
+import React from 'react'
+import cn from 'classnames'
+import styles from './Container.module.css'
 
-export const Container = styled.div`
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 80rem;
+export const Container = ({ className, ...props}) => {
+  return <div {...props} className={cn(styles.container, className)} />
+}
 
-  @media (min-width: 1024px) {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-
-  @media (min-width: 640px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-`
-
-export const PageContainer = styled(Container)`
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
-
-  @media (max-width: 768px) {
-    padding-top: 0rem;
-  }
-`
+export const PageContainer = (props) => {
+  return <Container {...props} className={styles.page} />
+}

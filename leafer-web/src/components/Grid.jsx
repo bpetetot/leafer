@@ -1,13 +1,10 @@
-import styled from '@emotion/styled'
+import React from 'react'
+import styles from './Grid.module.css'
 
-export const Grid = styled.ul`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  grid-gap: 2.5rem;
-  margin: 0 auto;
-`
+export const Grid = (props) => {
+  return <ul {...props} className={styles.grid} />
+}
 
-export const GridItem = styled.ul`
-  width: 100%;
-  height: 100%;
-`
+export const GridItem = (props) => {
+  return <li {...props} className={styles.item} />
+}
