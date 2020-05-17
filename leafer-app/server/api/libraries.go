@@ -59,6 +59,7 @@ func CreateLibrary(c *gin.Context) {
 
 	library := db.Library{Name: input.Name, Path: input.Path}
 	conn.Create(&library)
+	conn.Last(&library)
 
 	c.JSON(http.StatusOK, library)
 }

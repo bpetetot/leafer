@@ -10,18 +10,24 @@ export const useLibrary = (libraryId) => {
     return fetchJSON(`${url}/${libraryId}`)
   })
 }
-export const addLibrary = (library) => {
-  return mutate(LIBRARIES, async (libraries) => {
-    const newLibrary = await fetchJSON(LIBRARIES, {
+export const addLibrary = (data) => {
+  return mutate(LIBRARIES, async (libraries = []) => {
+    const library = await fetchJSON(LIBRARIES, {
       method: 'POST',
-      body: JSON.stringify(library),
+      body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     })
-    return [...libraries, newLibrary]
+    return [...libraries, library]
   })
 }
 
 export const removeLibrary = async (id) => {
-  await fetchJSON(`${LIBRARIES}/${id}`, { method: 'DELETE' })
-  mutate(LIBRARIES)
+  return mutate(LIBRARIES, async (libraries = []) => {
+    await fetchJSON(`${LIBRARIES}/${id}`, { method: 'DELETE' })
+    return libraries.filter(library => library.id !== id)
+  })
+}
+
+export const scanLibrary = async (id) => {
+  await fetchJSON(`${LIBRARIES}/${id}/scan`)
 }
