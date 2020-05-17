@@ -5,6 +5,10 @@ import { useLibrary } from '../services/libraries'
 import { useMedia } from '../services/media'
 import Header from '../components/Header'
 
+const MediaHeader = ({ children }) => (
+  <Header title={<Breadcrumb />}>{children}</Header>
+)
+
 const Breadcrumb = () => {
   const { libraryId, collectionId, mediaId } = useParams()
 
@@ -14,12 +18,8 @@ const Breadcrumb = () => {
 
   return (
     <ul style={{ display: 'flex' }}>
-      <li>
-        <Link to="/">Libraries</Link>
-      </li>
       {library && (
         <li>
-          &nbsp;&gt;&nbsp;
           {collection ? (
             <Link to={`/library/${libraryId}`}>{library.name}</Link>
           ) : (
@@ -43,9 +43,5 @@ const Breadcrumb = () => {
     </ul>
   )
 }
-
-const MediaHeader = ({ children }) => (
-  <Header title={<Breadcrumb />}>{children}</Header>
-)
 
 export default MediaHeader

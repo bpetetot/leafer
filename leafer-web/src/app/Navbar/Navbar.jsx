@@ -3,11 +3,16 @@ import { Link } from 'react-router-dom'
 
 import { ReactComponent as Logo } from '../../assets/logo.svg'
 import { ReactComponent as IconSettings } from '../../assets/icons/settings.svg'
+import { useFullscreen } from '../../hooks/useFullscreen'
+import { Container } from '../../components/Container'
 
-import {Container} from '../../components/Container'
 import styles from './Navbar.module.css'
 
 const Navbar = () => {
+  const { fullscreen } = useFullscreen()
+
+  if (fullscreen) return null
+
   return (
     <nav className={styles.navbar}>
       <Container>
