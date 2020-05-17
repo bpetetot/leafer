@@ -5,12 +5,13 @@ import { ReactComponent as NextIcon } from '../assets/icons/chevron-right.svg'
 import { ReactComponent as NextMedia } from '../assets/icons/chevrons-right.svg'
 import { ReactComponent as PreviousIcon } from '../assets/icons/chevron-left.svg'
 import { ReactComponent as PreviousMedia } from '../assets/icons/chevrons-left.svg'
-
+import { useQueryParam } from '../hooks/useQueryParam'
 import { fetchMediaByIndex, fetchMediaPage, useMedia } from '../services/media'
 import { PageContainer } from '../components/Container'
+
 import MediaHeader from './MediaHeader'
 import Reader from './Reader'
-import { useQueryParam } from './useQueryParam'
+import { useKey } from '../hooks/useKey'
 
 function MediaReader() {
   const { libraryId, collectionId, mediaId } = useParams()
@@ -39,10 +40,29 @@ function MediaReader() {
     async (index) => {
       const next = await fetchMediaByIndex(libraryId, collectionId, index)
       if (!next) return
-      navigate(`/library/${libraryId}/${collectionId}/${next.id}`)
+      navigate(`/library/${libraryId}/${collectionId}/${next.id}?page=0`)
     },
     [collectionId, libraryId, navigate]
   )
+
+  const onNextPage = () => {
+    if (pageIndex >= pageCount - 1) {
+      handleChangeMedia(mediaIndex + 1)
+    } else {
+      handlePageChanged(pageIndex + 1)
+    }
+  }
+
+  const onPreviousPage = () => {
+    if (pageIndex <= 0) {
+      handleChangeMedia(mediaIndex - 1)
+    } else {
+      handlePageChanged(pageIndex - 1)
+    }
+  }
+  
+  useKey('ArrowRight', onNextPage)
+  useKey('ArrowLeft', onPreviousPage)
 
   return (
     <>
@@ -51,11 +71,11 @@ function MediaReader() {
           <button onClick={() => handleChangeMedia(mediaIndex - 1)}>
             <PreviousMedia />
           </button>
-          <button onClick={() => handlePageChanged(pageIndex - 1)}>
+          <button onClick={onPreviousPage}>
             <PreviousIcon />
           </button>
           <div>{`${pageIndex + 1} / ${pageCount}`}</div>
-          <button onClick={() => handlePageChanged(pageIndex + 1)}>
+          <button onClick={onNextPage}>
             <NextIcon />
           </button>
           <button onClick={() => handleChangeMedia(mediaIndex + 1)}>
@@ -69,7 +89,8 @@ function MediaReader() {
           pageIndex={pageIndex}
           pageCount={pageCount}
           loadPage={loadImage}
-          onPageChanged={handlePageChanged}
+          onNextPage={onNextPage}
+          onPreviousPage={onPreviousPage}
         />
       </PageContainer>
     </>

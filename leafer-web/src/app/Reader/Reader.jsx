@@ -17,7 +17,8 @@ function Reader({
   pageIndex = 0,
   pageCount,
   loadPage,
-  onPageChanged,
+  onNextPage,
+  onPreviousPage,
   displayMode,
 }) {
   const [page, setPage] = useState(null)
@@ -54,19 +55,9 @@ function Reader({
       })
   }, [handleLoadPage, pageIndex])
 
-  const nextPage = () => {
-    const nextIndex = pageIndex + 1
-    onPageChanged(nextIndex)
-  }
-
-  const previousPage = () => {
-    const previousIndex = pageIndex - 1
-    onPageChanged(previousIndex)
-  }
-
   const handlers = useSwipeable({
-    onSwipedLeft: () => nextPage(),
-    onSwipedRight: () => previousPage(),
+    onSwipedLeft: onNextPage,
+    onSwipedRight: onPreviousPage,
     ...swipeConfig,
   })
 
