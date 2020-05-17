@@ -1,7 +1,7 @@
 import React from 'react'
 
-import Header from '../components/Header'
-import {PageContainer} from '../components/Container'
+import Header from 'components/Header'
+import {PageContainer} from 'components/Container'
 
 const Settings = () => (
   <>

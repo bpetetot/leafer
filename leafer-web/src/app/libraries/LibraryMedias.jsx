@@ -1,12 +1,12 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 
-import { PageContainer } from '../components/Container'
-import { Grid, GridItem } from '../components/Grid'
-import { useMediasLibrary } from '../services/media'
-import MediaHeader from './MediaHeader'
+import { PageContainer } from 'components/Container'
+import { Grid, GridItem } from 'components/Grid'
+import { useMediasLibrary } from 'services/media'
+import MediaHeader from '../common/MediaHeader'
 
-function MediaLibrary() {
+function LibraryMedias() {
   let { libraryId } = useParams()
   const { data: medias } = useMediasLibrary(libraryId)
 
@@ -57,4 +57,4 @@ function MediaLibrary() {
   )
 }
 
-export default MediaLibrary
+export default LibraryMedias

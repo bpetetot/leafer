@@ -1,12 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import Header from '../components/Header'
-import { PageContainer } from '../components/Container'
-import { List, ListItem } from '../components/List'
-import { useLibraries, removeLibrary } from '../services/libraries'
+import Header from 'components/Header'
+import { PageContainer } from 'components/Container'
+import { List, ListItem } from 'components/List'
+import { useLibraries, removeLibrary } from 'services/libraries'
 
-function Home() {
+function Libraries() {
   const { data = [] } = useLibraries()
 
   return (
@@ -28,4 +28,4 @@ function Home() {
   )
 }
 
-export default Home
+export default Libraries

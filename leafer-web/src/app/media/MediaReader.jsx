@@ -1,19 +1,19 @@
 import React, { useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 
-import { ReactComponent as NextIcon } from '../assets/icons/chevron-right.svg'
-import { ReactComponent as NextMedia } from '../assets/icons/chevrons-right.svg'
-import { ReactComponent as PreviousIcon } from '../assets/icons/chevron-left.svg'
-import { ReactComponent as PreviousMedia } from '../assets/icons/chevrons-left.svg'
-import { ReactComponent as FullscreenIcon } from '../assets/icons/maximize.svg'
-import { useQueryParam } from '../hooks/useQueryParam'
-import { fetchMediaByIndex, fetchMediaPage, useMedia } from '../services/media'
-import { PageContainer } from '../components/Container'
+import { ReactComponent as NextIcon } from 'assets/icons/chevron-right.svg'
+import { ReactComponent as NextMedia } from 'assets/icons/chevrons-right.svg'
+import { ReactComponent as PreviousIcon } from 'assets/icons/chevron-left.svg'
+import { ReactComponent as PreviousMedia } from 'assets/icons/chevrons-left.svg'
 
-import MediaHeader from './MediaHeader'
+import { useKey } from 'hooks/useKey'
+import { useFullscreen } from 'hooks/useFullscreen'
+import { useQueryParam } from 'hooks/useQueryParam'
+import { fetchMediaByIndex, fetchMediaPage, useMedia } from 'services/media'
+import { PageContainer } from 'components/Container'
+
+import MediaHeader from '../common/MediaHeader'
 import Reader from './Reader'
-import { useKey } from '../hooks/useKey'
-import { useFullscreen } from '../hooks/useFullscreen'
 
 function MediaReader() {
   const { libraryId, collectionId, mediaId } = useParams()

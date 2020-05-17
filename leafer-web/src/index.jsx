@@ -5,14 +5,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 import { fetchJSON as fetcher } from './services/utils'
 import {FullscreenProvider} from './hooks/useFullscreen'
-import Navbar from './app/Navbar'
-import Home from './app/Home'
-import MediaLibrary from './app/MediaLibrary'
-import MediaDetail from './app/MediaDetail'
-import MediaReader from './app/MediaReader'
+
+import { Libraries, LibraryMedias, NewLibrary } from './app/libraries'
+import { MediaDetail, MediaReader } from './app/media'
+import Navbar from './app/common/Navbar'
 import Settings from './app/Settings'
 import NotFound from './app/NotFound'
-import AddLibrary from './app/AddLibrary'
+
 
 import './styles'
 
@@ -23,9 +22,9 @@ ReactDOM.render(
         <BrowserRouter>
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/library/new" element={<AddLibrary />} />
-            <Route path="/library/:libraryId" element={<MediaLibrary />} />
+            <Route path="/" element={<Libraries />} />
+            <Route path="/library/new" element={<NewLibrary />} />
+            <Route path="/library/:libraryId" element={<LibraryMedias />} />
             <Route path="/library/:libraryId/:collectionId" element={<MediaDetail />} />
             <Route path="/library/:libraryId/:collectionId/:mediaId" element={<MediaReader />} />
             <Route path="/settings" element={<Settings />} />

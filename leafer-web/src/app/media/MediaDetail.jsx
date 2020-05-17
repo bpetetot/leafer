@@ -1,10 +1,10 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 
-import { PageContainer } from '../components/Container'
-import { List, ListItem } from '../components/List'
-import { useMedia, useMediasCollection } from '../services/media'
-import MediaHeader from './MediaHeader'
+import { PageContainer } from 'components/Container'
+import { List, ListItem } from 'components/List'
+import { useMedia, useMediasCollection } from 'services/media'
+import MediaHeader from '../common/MediaHeader'
 
 function MediaDetail() {
   let { libraryId, collectionId } = useParams()
