@@ -11,6 +11,7 @@ export const List = styled.ul`
 export const ListItem = styled.li`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e5e7eb;
 `

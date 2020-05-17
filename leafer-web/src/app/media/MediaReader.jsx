@@ -11,6 +11,7 @@ import { useFullscreen } from 'hooks/useFullscreen'
 import { useQueryParam } from 'hooks/useQueryParam'
 import { fetchMediaByIndex, fetchMediaPage, useMedia } from 'services/media'
 import { PageContainer } from 'components/Container'
+import { IconButton } from 'components/Button'
 
 import MediaHeader from '../common/MediaHeader'
 import Reader from './Reader'
@@ -74,19 +75,21 @@ function MediaReader() {
       {!fullscreen && (
         <MediaHeader>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <button onClick={() => handleChangeMedia(mediaIndex - 1)}>
+            <IconButton onClick={() => handleChangeMedia(mediaIndex - 1)}>
               <PreviousMedia />
-            </button>
-            <button onClick={onPreviousPage}>
+            </IconButton>
+            <IconButton onClick={onPreviousPage}>
               <PreviousIcon />
-            </button>
-            <div>{`${pageIndex + 1} / ${pageCount}`}</div>
-            <button onClick={onNextPage}>
+            </IconButton>
+            <div style={{ margin: '0 1rem' }}>
+              {`${pageIndex + 1} / ${pageCount}`}
+            </div>
+            <IconButton onClick={onNextPage}>
               <NextIcon />
-            </button>
-            <button onClick={() => handleChangeMedia(mediaIndex + 1)}>
+            </IconButton>
+            <IconButton onClick={() => handleChangeMedia(mediaIndex + 1)}>
               <NextMedia />
-            </button>
+            </IconButton>
           </div>
         </MediaHeader>
       )}

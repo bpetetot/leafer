@@ -1,10 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+import { ReactComponent as RemoveIcon } from 'assets/icons/trash.svg'
 import Header from 'components/Header'
 import { PageContainer } from 'components/Container'
+import { IconButton } from 'components/Button'
 import { List, ListItem } from 'components/List'
-import { useLibraries, removeLibrary } from 'services/libraries'
+import { useLibraries } from 'services/libraries'
 
 function Libraries() {
   const { data = [] } = useLibraries()
@@ -19,7 +21,9 @@ function Libraries() {
           {data.map(({ id, path }) => (
             <ListItem key={id}>
               <Link to={`/library/${id}`}>{path}</Link>
-              <button onClick={() => removeLibrary(id)}>Remove</button>
+              <IconButton>
+                <RemoveIcon />
+              </IconButton>
             </ListItem>
           ))}
         </List>
