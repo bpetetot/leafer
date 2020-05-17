@@ -11,7 +11,9 @@ function Home() {
 
   return (
     <>
-      <Header title="Libraries" />
+      <Header title="Libraries">
+        <Link to="/library/new">Add library</Link>
+      </Header>
       <PageContainer>
         <List>
           {data.map(({ id, path }) => (

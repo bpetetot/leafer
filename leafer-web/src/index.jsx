@@ -11,6 +11,7 @@ import MediaDetail from './app/MediaDetail'
 import MediaReader from './app/MediaReader'
 import Settings from './app/Settings'
 import NotFound from './app/NotFound'
+import AddLibrary from './app/AddLibrary'
 
 import './styles'
 
@@ -21,6 +22,7 @@ ReactDOM.render(
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/library/new" element={<AddLibrary />} />
           <Route path="/library/:libraryId" element={<MediaLibrary />} />
           <Route path="/library/:libraryId/:collectionId" element={<MediaDetail />} />
           <Route path="/library/:libraryId/:collectionId/:mediaId" element={<MediaReader />} />
