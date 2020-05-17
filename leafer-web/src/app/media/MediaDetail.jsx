@@ -52,10 +52,10 @@ function MediaDetail() {
           </div>
         </div>
         <List>
-          {(medias?.data || [media])?.map((media) => (
-            <ListItem key={media.id}>
-              <Link to={`/library/${libraryId}/${collectionId}/${media.id}`}>
-                #{String(media.volume || 0).padStart(3, '0')} {media.fileName}
+          {(medias?.data || [media])?.map((item) => (
+            <ListItem key={item.id}>
+              <Link to={`/library/${libraryId}/${collectionId}/${item.id}`}>
+                #{String(item.volume || 0).padStart(3, '0')} {media.title || media.titleNative}
               </Link>
             </ListItem>
           ))}
