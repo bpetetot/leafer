@@ -37,18 +37,20 @@ function Reader({
     [loadPage, pageCount]
   )
 
-  useEffect(() => { 
+  useEffect(() => {
     cache.current = []
   }, [id])
 
   useEffect(() => {
-    // avoid loading if page in cache
     if (!cache.current[pageIndex]) {
       setPage(undefined)
     }
     // load current page
     handleLoadPage(pageIndex)
-      .then(setPage)
+      .then((page) => {
+        setPage(page)
+        window.scrollTo(0, 0)
+      })
       .then(() => {
         // load next page in cache
         handleLoadPage(pageIndex + 1)
