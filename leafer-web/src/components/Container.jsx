@@ -19,4 +19,8 @@ export const Container = styled.div`
 export const PageContainer = styled(Container)`
   padding-top: 2.5rem;
   padding-bottom: 2.5rem;
+
+  @media (max-width: 768px) {
+    padding-top: 0rem;
+  }
 `
