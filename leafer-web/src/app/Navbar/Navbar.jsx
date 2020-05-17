@@ -1,11 +1,11 @@
 import React from 'react'
-
-import { ReactComponent as Logo } from '../assets/logo.svg'
-import { ReactComponent as IconSettings } from '../assets/icons/settings.svg'
-
-import styles from './Navbar.module.css'
 import { Link } from 'react-router-dom'
-import {Container} from '../components/Container'
+
+import { ReactComponent as Logo } from '../../assets/logo.svg'
+import { ReactComponent as IconSettings } from '../../assets/icons/settings.svg'
+
+import {Container} from '../../components/Container'
+import styles from './Navbar.module.css'
 
 const Navbar = () => {
   return (

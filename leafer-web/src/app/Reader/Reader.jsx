@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import cn from 'classnames'
 import { useSwipeable } from 'react-swipeable'
+import cn from 'classnames'
 
 import './Reader.css'
 

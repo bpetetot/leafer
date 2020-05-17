@@ -1,16 +1,16 @@
 import React, { useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 
-import { PageContainer } from './components/Container'
+import { ReactComponent as NextIcon } from '../assets/icons/chevron-right.svg'
+import { ReactComponent as NextMedia } from '../assets/icons/chevrons-right.svg'
+import { ReactComponent as PreviousIcon } from '../assets/icons/chevron-left.svg'
+import { ReactComponent as PreviousMedia } from '../assets/icons/chevrons-left.svg'
+
+import { fetchMediaByIndex, fetchMediaPage, useMedia } from '../services/media'
+import { PageContainer } from '../components/Container'
 import MediaHeader from './MediaHeader'
 import Reader from './Reader'
 import { useQueryParam } from './useQueryParam'
-import { fetchMediaByIndex, fetchMediaPage, useMedia } from './services/media'
-
-import { ReactComponent as NextIcon } from './assets/icons/chevron-right.svg'
-import { ReactComponent as NextMedia } from './assets/icons/chevrons-right.svg'
-import { ReactComponent as PreviousIcon } from './assets/icons/chevron-left.svg'
-import { ReactComponent as PreviousMedia } from './assets/icons/chevrons-left.svg'
 
 function MediaReader() {
   const { libraryId, collectionId, mediaId } = useParams()

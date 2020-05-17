@@ -1,9 +1,10 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
+
+import { PageContainer } from '../components/Container'
+import { Grid, GridItem } from '../components/Grid'
+import { useMediasLibrary } from '../services/media'
 import MediaHeader from './MediaHeader'
-import { PageContainer } from './components/Container'
-import { Grid, GridItem } from './components/Grid'
-import { useMediasLibrary } from './services/media'
 
 function MediaLibrary() {
   let { libraryId } = useParams()
