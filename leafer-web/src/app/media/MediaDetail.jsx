@@ -5,6 +5,7 @@ import { PageContainer } from 'components/Container'
 import { List, ListItem } from 'components/List'
 import { useMedia, useMediasCollection } from 'services/media'
 import MediaHeader from '../common/MediaHeader'
+import Text from 'components/Text'
 
 function MediaDetail() {
   let { libraryId, collectionId } = useParams()
@@ -47,7 +48,7 @@ function MediaDetail() {
             >
               {media.title}
             </h1>
-            <p dangerouslySetInnerHTML={{ __html: media.description }} />
+            <Text dangerouslySetInnerHTML={{ __html: media.description }} />
           </div>
         </div>
         <List>

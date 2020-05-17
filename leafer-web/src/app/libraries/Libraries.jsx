@@ -8,6 +8,7 @@ import { PageContainer } from 'components/Container'
 import { IconButton } from 'components/Button'
 import { List, ListItem } from 'components/List'
 import { useLibraries, removeLibrary, scanLibrary } from 'services/libraries'
+import Text from 'components/Text'
 
 function Libraries() {
   const { data = [] } = useLibraries()
@@ -23,7 +24,7 @@ function Libraries() {
             <ListItem key={id}>
               <div>
                 <Link to={`/library/${id}`}>{name}</Link>
-                <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>{path}</p>
+                <Text size="sm">{path}</Text>
               </div>
               <div style={{ display: 'flex' }}>
                 <IconButton onClick={() => scanLibrary(id)}>

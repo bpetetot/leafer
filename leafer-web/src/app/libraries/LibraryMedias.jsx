@@ -5,6 +5,7 @@ import { PageContainer } from 'components/Container'
 import { Grid, GridItem } from 'components/Grid'
 import { useMediasLibrary } from 'services/media'
 import MediaHeader from '../common/MediaHeader'
+import Text from 'components/Text'
 
 function LibraryMedias() {
   let { libraryId } = useParams()
@@ -39,14 +40,9 @@ function LibraryMedias() {
                   {media.title}
                 </Link>
                 {media.type === 'COLLECTION' && (
-                  <p
-                    style={{
-                      fontSize: '0.75rem',
-                      color: '#6b7280',
-                    }}
-                  >
+                  <Text size="sm">
                     {media.mediaCount} media
-                  </p>
+                  </Text>
                 )}
               </div>
             </GridItem>
