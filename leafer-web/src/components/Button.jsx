@@ -34,6 +34,7 @@ export const IconButton = styled(Button)`
   width: 48px;
   
   padding: 0;
+  margin: 0 0.25rem;
 
   border: 0;
   border-radius: 50%;

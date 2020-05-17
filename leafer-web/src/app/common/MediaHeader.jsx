@@ -32,14 +32,14 @@ const Breadcrumb = () => {
           &nbsp;&gt;&nbsp;
           {media ? (
             <Link to={`/library/${libraryId}/${collectionId}`}>
-              {collection.estimatedName}
+              {collection.title}
             </Link>
           ) : (
-            collection.estimatedName
+            collection.title
           )}
         </li>
       )}
-      {media && <li>&nbsp;&gt;&nbsp;{media.fileName}</li>}
+      {media && <li>&nbsp;&gt;&nbsp;#{String(media.volume || 0).padStart(3, '0')}</li>}
     </ul>
   )
 }

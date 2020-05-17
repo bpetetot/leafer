@@ -41,7 +41,7 @@ function LibraryMedias() {
                 {media.type === 'COLLECTION' && (
                   <p
                     style={{
-                      fontSize: '0.8rem',
+                      fontSize: '0.75rem',
                       color: '#6b7280',
                     }}
                   >

@@ -17,7 +17,7 @@ function MediaDetail() {
     <>
       <MediaHeader />
       <PageContainer>
-        <div style={{ display: 'flex' }}>
+        <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
           <div style={{ maxWidth: '20%' }}>
             <img
               src={media.coverImage}
