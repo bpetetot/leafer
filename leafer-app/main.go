@@ -27,10 +27,17 @@ func main() {
 
 	app.Commands = []*cli.Command{
 		{
-			Name:  "server",
+			Name:  "serve",
 			Usage: "start Leafer server",
 			Action: func(c *cli.Context) error {
 				server.Start()
+				return nil
+			},
+		}, {
+			Name:  "expose",
+			Usage: "expose server through UPNP router",
+			Action: func(c *cli.Context) error {
+				server.Expose()
 				return nil
 			},
 		},
