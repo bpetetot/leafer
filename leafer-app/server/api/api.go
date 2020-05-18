@@ -18,4 +18,6 @@ func Routes(route string, router *gin.Engine) {
 	api.GET("/media", SearchMedia)
 	api.GET("/media/:id", GetMedia)
 	api.GET("/media/:id/content", GetMediaContent)
+	api.PATCH("/media/:id/read", MarkMediaAsRead)
+	api.PATCH("/media/:id/unread", MarkMediaAsUnread)
 }

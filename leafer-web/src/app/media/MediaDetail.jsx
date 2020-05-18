@@ -1,16 +1,20 @@
 import React from 'react'
 import { useParams, Link } from 'react-router-dom'
 
+import { ReactComponent as ReadIcon } from 'assets/icons/check-circle.svg'
+import { ReactComponent as UnreadIcon } from 'assets/icons/circle.svg'
+
 import { PageContainer } from 'components/Container'
 import { List, ListItem } from 'components/List'
-import { useMedia, useMediasCollection } from 'services/media'
-import MediaHeader from '../common/MediaHeader'
+import { useMedia, useMediasCollection, markAsRead, markAsUnread } from 'services/media'
 import Text from 'components/Text'
+import { IconButton } from 'components/Button'
+import MediaHeader from '../common/MediaHeader'
 
 function MediaDetail() {
   let { libraryId, collectionId } = useParams()
   const { data: media } = useMedia(collectionId)
-  const { data: medias } = useMediasCollection(libraryId, media)
+  const { data: medias, mutate } = useMediasCollection(libraryId, media)
 
   if (!media) return <p>Loading...</p>
 
@@ -55,8 +59,16 @@ function MediaDetail() {
           {(medias?.data || [media])?.map((item) => (
             <ListItem key={item.id}>
               <Link to={`/library/${libraryId}/${collectionId}/${item.id}`}>
-                #{String(item.volume || 0).padStart(3, '0')} {media.title || media.titleNative}
+                #{String(item.volume || 0).padStart(3, '0')}{' '}
+                {media.title || media.titleNative}
               </Link>
+              <div>
+                {item.lastViewedAt ? (
+                  <IconButton onClick={() => markAsUnread(item.id).then(() => mutate())}><ReadIcon /></IconButton>
+                ) : (
+                  <IconButton onClick={() => markAsRead(item.id).then(() => mutate())}><UnreadIcon /></IconButton>
+                )}
+              </div>
             </ListItem>
           ))}
         </List>

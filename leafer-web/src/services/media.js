@@ -20,7 +20,9 @@ export const useMediasCollection = (libraryId, mediaCollection) => {
   return useSWR(
     shouldFetch ? [MEDIA, libraryId, mediaCollection.id] : null,
     (url, libraryId, parentMediaId) => {
-      return fetchJSON(`${url}?libraryId=${libraryId}&parentMediaId=${parentMediaId}`)
+      return fetchJSON(
+        `${url}?libraryId=${libraryId}&parentMediaId=${parentMediaId}`
+      )
     }
   )
 }
@@ -38,3 +40,9 @@ export const fetchMediaByIndex = async (
 export const fetchMediaPage = async (mediaId, pageIndex) => {
   return fetchBase64(`${MEDIA}/${mediaId}/content?page=${pageIndex}`)
 }
+
+export const markAsRead = (mediaId) =>
+  fetchJSON(`/api/media/${mediaId}/read`, { method: 'PATCH' })
+
+export const markAsUnread = (mediaId) =>
+  fetchJSON(`/api/media/${mediaId}/unread`, { method: 'PATCH' })

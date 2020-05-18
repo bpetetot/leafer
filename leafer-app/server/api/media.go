@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -93,4 +94,38 @@ func GetMediaContent(c *gin.Context) {
 	c.Header("Content-type", "image/jpg")
 	c.Header("Content-Disposition", "inline")
 	c.Writer.WriteHeader(http.StatusOK)
+}
+
+// MarkMediaAsRead mark media as read
+func MarkMediaAsRead(c *gin.Context) {
+	conn := c.MustGet("db").(*gorm.DB)
+
+	var id = c.Param("id")
+	var media db.Media
+	var queryMedia = conn.First(&media, id)
+	if queryMedia.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
+		return
+	}
+
+	conn.Model(&media).Update("LastViewedAt", time.Now())
+
+	c.JSON(http.StatusOK, media)
+}
+
+// MarkMediaAsUnread mark media as read
+func MarkMediaAsUnread(c *gin.Context) {
+	conn := c.MustGet("db").(*gorm.DB)
+
+	var id = c.Param("id")
+	var media db.Media
+	var queryMedia = conn.First(&media, id)
+	if queryMedia.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
+		return
+	}
+
+	conn.Model(&media).Update("LastViewedAt", nil)
+
+	c.JSON(http.StatusOK, media)
 }

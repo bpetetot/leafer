@@ -44,6 +44,8 @@ type Media struct {
 	MediaCount int      `json:"mediaCount,omitempty"`
 	Medias     *[]Media `json:"medias,omitempty" gorm:"-"`
 
+	LastViewedAt *time.Time `json:"lastViewedAt"`
+
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }

@@ -9,7 +9,7 @@ import { ReactComponent as PreviousMedia } from 'assets/icons/chevrons-left.svg'
 import { useKey } from 'hooks/useKey'
 import { useFullscreen } from 'hooks/useFullscreen'
 import { useQueryParam } from 'hooks/useQueryParam'
-import { fetchMediaByIndex, fetchMediaPage, useMedia } from 'services/media'
+import { fetchMediaByIndex, fetchMediaPage, useMedia, markAsRead } from 'services/media'
 import { PageContainer } from 'components/Container'
 import { IconButton } from 'components/Button'
 
@@ -34,9 +34,10 @@ function MediaReader() {
     (pageIndex) => {
       if (pageIndex === null) return
       if (pageIndex < 0 || pageIndex >= pageCount) return
+      if (pageIndex === pageCount - 1) markAsRead(media.id)
       navigate(`${pathname}?page=${pageIndex}`)
     },
-    [pathname, pageCount, navigate]
+    [pageCount, media, navigate, pathname]
   )
 
   const handleChangeMedia = useCallback(
