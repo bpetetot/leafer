@@ -42,15 +42,13 @@ function Reader({
   }, [id])
 
   useEffect(() => {
-    if (!cache.current[pageIndex]) {
-      setPage(undefined)
-    }
+    window.scrollTo(0, 0)
+  }, [page])
+
+  useEffect(() => {
     // load current page
     handleLoadPage(pageIndex)
-      .then((page) => {
-        setPage(page)
-        window.scrollTo(0, 0)
-      })
+      .then(setPage)
       .then(() => {
         // load next page in cache
         handleLoadPage(pageIndex + 1)
