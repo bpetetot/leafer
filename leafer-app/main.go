@@ -40,6 +40,13 @@ func main() {
 				server.Expose()
 				return nil
 			},
+		}, {
+			Name:  "unexpose",
+			Usage: "Unexpose server through UPNP router",
+			Action: func(c *cli.Context) error {
+				server.Unexpose()
+				return nil
+			},
 		},
 		{
 			Name:  "analyze",

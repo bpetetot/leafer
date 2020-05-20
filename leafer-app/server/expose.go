@@ -26,6 +26,15 @@ func Expose() {
 		log.Fatal(err)
 	}
 	log.Printf("Leafer Media Server exposed to: http://%s:%v", ip, 8888)
+}
+
+// Unexpose server through UPNP Router (proto to test it)
+func Unexpose() {
+	// connect to router
+	d, err := upnp.Discover()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// un-forward a port
 	err = d.Clear(8888)
