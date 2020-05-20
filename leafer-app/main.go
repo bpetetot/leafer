@@ -46,11 +46,8 @@ func main() {
 			Usage: "start a library analysis",
 			Action: func(c *cli.Context) error {
 				conn := db.Setup()
-				library := db.Library{Name: "My mangas", Path: c.Args().First()}
-				conn.Create(&library)
-				// var library db.Library
-				// conn.First(&library)
-
+				var library db.Library
+				conn.First(&library)
 				scanners.ScanLibrary(&library, conn)
 				scanners.ScanMedias(&library, conn)
 				return nil
