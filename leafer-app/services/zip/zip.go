@@ -1,4 +1,4 @@
-package utils
+package zip
 
 import (
 	"archive/zip"
@@ -6,10 +6,12 @@ import (
 	"io"
 	"path/filepath"
 	"sort"
+
+	"github.com/bpetetot/leafer/services/utils"
 )
 
-// ListImagesInZip will list all images within the zip archive
-func ListImagesInZip(src string) ([]string, error) {
+// ListImages will list all images within the zip archive
+func ListImages(src string) ([]string, error) {
 	var extensions = []string{".jpg", ".jpeg", ".png", ".bmp", ".gif"}
 	var filenames []string
 
@@ -21,7 +23,7 @@ func ListImagesInZip(src string) ([]string, error) {
 
 	for _, file := range reader.File {
 		ext := filepath.Ext(file.Name)
-		matched := Contains(extensions, ext)
+		matched := utils.Contains(extensions, ext)
 
 		if !matched {
 			continue
@@ -29,15 +31,15 @@ func ListImagesInZip(src string) ([]string, error) {
 		filenames = append(filenames, file.Name)
 	}
 
-	sort.Sort(Natural(filenames))
+	sort.Sort(utils.Natural(filenames))
 
 	return filenames, nil
 }
 
-// StreamImageFromZip Unzip a specific image in the archive and stream it to the
+// StreamImage Unzip a specific image in the archive and stream it to the
 // given io.Writer
-func StreamImageFromZip(src string, index int, w io.Writer) error {
-	filenames, err := ListImagesInZip(src)
+func StreamImage(src string, index int, w io.Writer) error {
+	filenames, err := ListImages(src)
 	if err != nil {
 		return err
 	}

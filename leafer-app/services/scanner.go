@@ -1,4 +1,4 @@
-package scanners
+package services
 
 import (
 	"io/ioutil"
@@ -10,18 +10,39 @@ import (
 	"strings"
 
 	"github.com/bpetetot/leafer/db"
-	"github.com/bpetetot/leafer/utils"
+	"github.com/bpetetot/leafer/services/utils"
+	"github.com/bpetetot/leafer/services/zip"
 	"github.com/jinzhu/gorm"
 )
 
-// ScanLibrary scans all files from a library
-func ScanLibrary(library *db.Library, conn *gorm.DB) {
-	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
-	db.DeleteMediasLibrary(conn, library.ID)
-	scanDirectory(library.Path, library, nil, 0, conn)
+// ScannerService exposes service to scan a library
+type ScannerService struct {
+	library db.LibraryStore
+	media   db.MediaStore
 }
 
-func scanDirectory(path string, library *db.Library, parentMedia *db.Media, mediaIndex int, conn *gorm.DB) int {
+// NewScannerService creates a library scanner service instance
+func NewScannerService(DB *gorm.DB) ScannerService {
+	return ScannerService{
+		library: db.NewLibraryStore(DB),
+		media:   db.NewMediaStore(DB),
+	}
+}
+
+// ScanLibrary scans the given library id
+func (s *ScannerService) ScanLibrary(id uint) error {
+	library, err := s.library.Get(id)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
+	s.media.DeleteMediasLibrary(library.ID)
+	s.scanDirectory(library.Path, library, nil, 0)
+	return nil
+}
+
+func (s *ScannerService) scanDirectory(path string, library *db.Library, parentMedia *db.Media, mediaIndex int) int {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return 0
@@ -35,35 +56,31 @@ func scanDirectory(path string, library *db.Library, parentMedia *db.Media, medi
 
 		newPath := filepath.Join(path, file.Name())
 		if file.IsDir() {
-			collection := createCollection(newPath, file, library, conn)
-
+			collection := s.createCollection(newPath, file, library)
 			if collection != nil {
-				mediaCount := scanDirectory(newPath, library, collection, 0, conn)
-
-				conn.Model(&collection).Update(db.Media{MediaCount: mediaCount})
-
-				log.Printf("[%s] %v media", newPath, mediaCount)
+				log.Printf("Scanning [%s]", newPath)
+				s.scanDirectory(newPath, library, collection, 0)
 			}
 		} else {
 			mediaIndex++
-			createMedia(newPath, file, library, parentMedia, mediaIndex, conn)
+			s.createMedia(newPath, file, library, parentMedia, mediaIndex)
 		}
 	}
 	return mediaIndex
 }
 
-func createCollection(path string, info os.FileInfo, library *db.Library, conn *gorm.DB) *db.Media {
-	collection := &db.Media{
+func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) *db.Media {
+	collection := db.Media{
 		Type:          "COLLECTION",
 		Library:       library,
 		Path:          path,
 		EstimatedName: info.Name(),
 	}
-	conn.Create(&collection)
-	return collection
+	s.media.Create(&collection)
+	return &collection
 }
 
-func createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int, conn *gorm.DB) {
+func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int) {
 	matched, err := filepath.Match("*.zip", info.Name())
 	if !matched || err != nil {
 		return
@@ -76,9 +93,9 @@ func createMedia(path string, info os.FileInfo, library *db.Library, collection 
 	volume, _ := strconv.Atoi(getVolumeNumber(name))
 
 	// get media info from file
-	zipFilesList, _ := utils.ListImagesInZip(path)
+	zipFilesList, _ := zip.ListImages(path)
 
-	media := &db.Media{
+	s.media.Create(&db.Media{
 		Type:          "MEDIA",
 		Library:       library,
 		ParentMedia:   collection,
@@ -89,8 +106,7 @@ func createMedia(path string, info os.FileInfo, library *db.Library, collection 
 		FileExtension: extension,
 		Volume:        volume,
 		PageCount:     len(zipFilesList),
-	}
-	conn.Create(&media)
+	})
 }
 
 func getVolumeNumber(filename string) string {

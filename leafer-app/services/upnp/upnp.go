@@ -1,4 +1,4 @@
-package server
+package upnp
 
 import (
 	"log"

@@ -4,31 +4,38 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// LibraryStore is the store giving access and writes to libraries
-type LibraryStore struct {
+// LibraryStore is a interface for library store
+type LibraryStore interface {
+	Find() (*[]Library, error)
+	Get(id uint) (*Library, error)
+	Create(name string, path string) (*Library, error)
+	Delete(id uint) error
+}
+
+type libraryRepo struct {
 	DB *gorm.DB
 }
 
 // NewLibraryStore creates a library store instance
 func NewLibraryStore(db *gorm.DB) LibraryStore {
-	return LibraryStore{DB: db}
+	return &libraryRepo{DB: db}
 }
 
 // Find returns all libraries in the db
-func (s LibraryStore) Find() ([]Library, error) {
+func (r *libraryRepo) Find() (*[]Library, error) {
 	var libraries []Library
-	query := s.DB.Find(&libraries)
+	query := r.DB.Find(&libraries)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 
-	return libraries, query.Error
+	return &libraries, query.Error
 }
 
 // Get returns the library with the given id
-func (s LibraryStore) Get(id uint) (*Library, error) {
+func (r *libraryRepo) Get(id uint) (*Library, error) {
 	var library Library
-	query := s.DB.First(&library, id)
+	query := r.DB.First(&library, id)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -37,14 +44,14 @@ func (s LibraryStore) Get(id uint) (*Library, error) {
 }
 
 // Create adds new library in db and returns it
-func (s LibraryStore) Create(name string, path string) (*Library, error) {
+func (r *libraryRepo) Create(name string, path string) (*Library, error) {
 	library := Library{Name: name, Path: path}
-	query := s.DB.Create(&library)
+	query := r.DB.Create(&library)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 
-	query = s.DB.Last(&library)
+	query = r.DB.Last(&library)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -52,13 +59,8 @@ func (s LibraryStore) Create(name string, path string) (*Library, error) {
 	return &library, nil
 }
 
-// Delete delete the library and its medias
-func (s LibraryStore) Delete(id uint) error {
-	err := DeleteMediasLibrary(s.DB, id)
-	if err != nil {
-		return err
-	}
-
-	query := s.DB.Unscoped().Delete(Library{ID: id})
+// Delete deletes the library
+func (r *libraryRepo) Delete(id uint) error {
+	query := r.DB.Unscoped().Delete(Library{ID: id})
 	return query.Error
 }

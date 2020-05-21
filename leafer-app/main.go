@@ -5,8 +5,9 @@ import (
 	"os"
 
 	"github.com/bpetetot/leafer/db"
-	"github.com/bpetetot/leafer/scanners"
 	"github.com/bpetetot/leafer/server"
+	"github.com/bpetetot/leafer/services"
+	"github.com/bpetetot/leafer/services/upnp"
 	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 )
@@ -37,14 +38,14 @@ func main() {
 			Name:  "expose",
 			Usage: "expose server through UPNP router",
 			Action: func(c *cli.Context) error {
-				server.Expose()
+				upnp.Expose()
 				return nil
 			},
 		}, {
 			Name:  "unexpose",
 			Usage: "Unexpose server through UPNP router",
 			Action: func(c *cli.Context) error {
-				server.Unexpose()
+				upnp.Unexpose()
 				return nil
 			},
 		},
@@ -52,11 +53,19 @@ func main() {
 			Name:  "analyze",
 			Usage: "start a library analysis",
 			Action: func(c *cli.Context) error {
-				conn := db.Setup()
-				var library db.Library
-				conn.First(&library)
-				scanners.ScanLibrary(&library, conn)
-				scanners.ScanMedias(&library, conn)
+				DB := db.Setup()
+				scanner := services.NewScannerService(DB)
+				scraper := services.NewScraperService(DB)
+
+				err := scanner.ScanLibrary(1)
+				if err != nil {
+					return err
+				}
+
+				err = scraper.ScrapLibrary(1)
+				if err != nil {
+					return err
+				}
 				return nil
 			},
 		},

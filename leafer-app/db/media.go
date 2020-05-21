@@ -7,19 +7,29 @@ import (
 )
 
 // MediaStore is the store giving access and writes to medias
-type MediaStore struct {
+type MediaStore interface {
+	Get(id uint) (*Media, error)
+	Search(inputs SearchMediaInputs) (*[]Media, error)
+	CountSearch(inputs SearchMediaInputs) int
+	Create(media *Media) error
+	Update(id uint, media *Media) error
+	UpdateLastViewed(id uint, when *time.Time) error
+	DeleteMediasLibrary(id uint) error
+}
+
+type mediaRepo struct {
 	DB *gorm.DB
 }
 
 // NewMediaStore creates a media store instance
 func NewMediaStore(db *gorm.DB) MediaStore {
-	return MediaStore{DB: db}
+	return &mediaRepo{DB: db}
 }
 
-// GetMedia get media info dependening on its type
-func (s MediaStore) GetMedia(id uint) (*Media, error) {
+// Get get media info dependening on its type
+func (r *mediaRepo) Get(id uint) (*Media, error) {
 	var media Media
-	query := s.DB.First(&media, id)
+	query := r.DB.First(&media, id)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -34,9 +44,8 @@ type SearchMediaInputs struct {
 	MediaIndex    string
 }
 
-// Search search medias corresponding to given search inputs
-func (s MediaStore) Search(inputs SearchMediaInputs) ([]Media, error) {
-	query := s.DB.Where("library_id = ?", inputs.LibraryID)
+func buildSearchQuery(db *gorm.DB, inputs SearchMediaInputs) *gorm.DB {
+	query := db.Where("library_id = ?", inputs.LibraryID)
 
 	if inputs.ParentMediaID != "" {
 		query = query.Where("parent_media_id = ?", inputs.ParentMediaID)
@@ -47,23 +56,53 @@ func (s MediaStore) Search(inputs SearchMediaInputs) ([]Media, error) {
 	if inputs.MediaIndex != "" {
 		query = query.Where("media_index = ?", inputs.MediaIndex)
 	}
+	return query
+}
+
+// Search search medias corresponding to given search inputs
+func (r *mediaRepo) Search(inputs SearchMediaInputs) (*[]Media, error) {
+	query := buildSearchQuery(r.DB, inputs)
 
 	var medias []Media
 	query = query.Order("mediaIndex").Find(&medias)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return medias, nil
+	return &medias, nil
+}
+
+// CountSearch count medias corresponding to given search inputs
+func (r *mediaRepo) CountSearch(inputs SearchMediaInputs) int {
+	query := buildSearchQuery(r.DB.Model(Media{}), inputs)
+
+	var count int
+	query = query.Count(&count)
+	if query.Error != nil {
+		return 0
+	}
+	return count
+}
+
+// Create creates the media
+func (r *mediaRepo) Create(media *Media) error {
+	query := r.DB.Create(media)
+	return query.Error
+}
+
+// Update updates the media
+func (r *mediaRepo) Update(id uint, media *Media) error {
+	query := r.DB.Model(Media{ID: id}).Update(media)
+	return query.Error
 }
 
 // UpdateLastViewed sets the last viewed value of the media
-func (s MediaStore) UpdateLastViewed(id uint, when *time.Time) error {
-	query := s.DB.Model(Media{ID: id}).Update("LastViewedAt", when)
+func (r *mediaRepo) UpdateLastViewed(id uint, when *time.Time) error {
+	query := r.DB.Model(Media{ID: id}).Update("LastViewedAt", when)
 	return query.Error
 }
 
 // DeleteMediasLibrary deletes library's media
-func DeleteMediasLibrary(db *gorm.DB, LibraryID uint) error {
-	query := db.Unscoped().Where("library_id = ?", LibraryID).Delete(&Media{})
+func (r *mediaRepo) DeleteMediasLibrary(id uint) error {
+	query := r.DB.Unscoped().Where("library_id = ?", id).Delete(&Media{})
 	return query.Error
 }
