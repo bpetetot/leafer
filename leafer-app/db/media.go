@@ -1,6 +1,10 @@
 package db
 
-import "time"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 // Media model
 type Media struct {
@@ -35,4 +39,10 @@ type Media struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// DeleteMediasLibrary deletes library's media
+func DeleteMediasLibrary(db *gorm.DB, LibraryID uint) error {
+	query := db.Unscoped().Where("LibraryID = ?", LibraryID).Delete(&Media{})
+	return query.Error
 }

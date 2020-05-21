@@ -17,7 +17,7 @@ import (
 // ScanLibrary scans all files from a library
 func ScanLibrary(library *db.Library, conn *gorm.DB) {
 	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
-	db.DeleteLibraryContent(library, conn)
+	db.DeleteMediasLibrary(conn, library.ID)
 	scanDirectory(library.Path, library, nil, 0, conn)
 }
 

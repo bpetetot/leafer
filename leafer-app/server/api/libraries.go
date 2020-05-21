@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -16,19 +17,14 @@ type CreateLibraryInput struct {
 	Path string `json:"path" binding:"required"`
 }
 
-// UpdateLibraryInput struct to update a library
-type UpdateLibraryInput struct {
-	Title  string `json:"title"`
-	Author string `json:"author"`
-}
-
 // ListLibraries GET /libraries
 func ListLibraries(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
-
-	var libraries []db.Library
-	conn.Find(&libraries)
-
+	libraries, err := db.FindLibraries(conn)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
 	c.JSON(http.StatusOK, libraries)
 }
 
@@ -36,10 +32,14 @@ func ListLibraries(c *gin.Context) {
 func FindLibrary(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
 
-	var library db.Library
-	var query = conn.Where("id = ?", c.Param("id")).First(&library)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
 
-	if query.Error != nil {
+	library, err := db.GetLibrary(conn, uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
 		return
 	}
@@ -53,36 +53,15 @@ func CreateLibrary(c *gin.Context) {
 
 	var input CreateLibraryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	library := db.Library{Name: input.Name, Path: input.Path}
-	conn.Create(&library)
-	conn.Last(&library)
-
-	c.JSON(http.StatusOK, library)
-}
-
-// UpdateLibrary update the given library
-func UpdateLibrary(c *gin.Context) {
-	conn := c.MustGet("db").(*gorm.DB)
-
-	var library db.Library
-	var query = conn.Where("id = ?", c.Param("id")).First(&library)
-
-	if query.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	library, err := db.CreateLibrary(conn, input.Name, input.Path)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
-
-	var input UpdateLibraryInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	conn.Model(&library).Updates(input)
 
 	c.JSON(http.StatusOK, library)
 }
@@ -91,15 +70,23 @@ func UpdateLibrary(c *gin.Context) {
 func DeleteLibrary(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
 
-	var library db.Library
-	var query = conn.Where("id = ?", c.Param("id")).First(&library)
-
-	if query.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
 		return
 	}
 
-	db.DeleteLibrary(&library, conn)
+	_, err = db.GetLibrary(conn, uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
+		return
+	}
+
+	err = db.DeleteLibrary(conn, uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "OK"})
 }
@@ -108,10 +95,14 @@ func DeleteLibrary(c *gin.Context) {
 func ScanLibraryAsync(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
 
-	var library db.Library
-	var query = conn.Where("id = ?", c.Param("id")).First(&library)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
 
-	if query.Error != nil {
+	library, err := db.GetLibrary(conn, uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
 		return
 	}
@@ -119,7 +110,7 @@ func ScanLibraryAsync(c *gin.Context) {
 	go func(library *db.Library, conn *gorm.DB) {
 		scanners.ScanLibrary(library, conn)
 		scanners.ScanMedias(library, conn)
-	}(&library, conn)
+	}(library, conn)
 
 	c.JSON(http.StatusOK, gin.H{"status": "OK"})
 }

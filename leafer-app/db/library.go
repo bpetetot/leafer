@@ -16,18 +16,51 @@ type Library struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// DeleteLibrary delete the library and its medias
-func DeleteLibrary(library *Library, conn *gorm.DB) {
-	DeleteLibraryContent(library, conn)
-	conn.Unscoped().Delete(&library)
+// FindLibraries returns all libraries in the db
+func FindLibraries(db *gorm.DB) ([]Library, error) {
+	var libraries []Library
+	query := db.Find(&libraries)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return libraries, query.Error
 }
 
-// DeleteLibraryContent delete library's media
-func DeleteLibraryContent(library *Library, conn *gorm.DB) {
-	var medias []Media
-	conn.Model(library).Association("Medias").Find(&medias)
-
-	for _, media := range medias {
-		conn.Unscoped().Delete(&media)
+// GetLibrary returns the library with the given id
+func GetLibrary(db *gorm.DB, id uint) (*Library, error) {
+	var library Library
+	query := db.First(&library, id)
+	if query.Error != nil {
+		return nil, query.Error
 	}
+
+	return &library, query.Error
+}
+
+// CreateLibrary adds new library in db and returns it
+func CreateLibrary(db *gorm.DB, name string, path string) (*Library, error) {
+	library := Library{Name: name, Path: path}
+	query := db.Create(&library)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	query = db.Last(&library)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	return &library, nil
+}
+
+// DeleteLibrary delete the library and its medias
+func DeleteLibrary(db *gorm.DB, id uint) error {
+	err := DeleteMediasLibrary(db, id)
+	if err != nil {
+		return err
+	}
+
+	query := db.Unscoped().Delete(Library{ID: id})
+	return query.Error
 }
