@@ -32,6 +32,7 @@ func ListLibraries(c *gin.Context) {
 // FindLibrary GET /libraries/:id
 func FindLibrary(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewLibraryStore(conn)
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
@@ -39,7 +40,6 @@ func FindLibrary(c *gin.Context) {
 		return
 	}
 
-	store := db.NewLibraryStore(conn)
 	library, err := store.Get(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
@@ -73,14 +73,13 @@ func CreateLibrary(c *gin.Context) {
 // DeleteLibrary delete the given library
 func DeleteLibrary(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewLibraryStore(conn)
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
 		return
 	}
-
-	store := db.NewLibraryStore(conn)
 
 	_, err = store.Get(uint(id))
 	if err != nil {
@@ -100,14 +99,13 @@ func DeleteLibrary(c *gin.Context) {
 // ScanLibraryAsync scan files for the given library
 func ScanLibraryAsync(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewLibraryStore(conn)
 
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
 		return
 	}
-
-	store := db.NewLibraryStore(conn)
 
 	library, err := store.Get(uint(id))
 	if err != nil {

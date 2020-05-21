@@ -64,6 +64,6 @@ func (s MediaStore) UpdateLastViewed(id uint, when *time.Time) error {
 
 // DeleteMediasLibrary deletes library's media
 func DeleteMediasLibrary(db *gorm.DB, LibraryID uint) error {
-	query := db.Unscoped().Where("LibraryID = ?", LibraryID).Delete(&Media{})
+	query := db.Unscoped().Where("library_id = ?", LibraryID).Delete(&Media{})
 	return query.Error
 }
