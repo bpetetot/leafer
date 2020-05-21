@@ -41,15 +41,10 @@ type Media struct {
 	PageCount     int    `json:"pageCount,omitempty"`
 	MediaIndex    int    `json:"mediaIndex,omitempty"`
 
-	MediaCount int      `json:"mediaCount,omitempty"`
-	Medias     *[]Media `json:"medias,omitempty" gorm:"-"`
+	MediaCount int `json:"mediaCount,omitempty"`
 
 	LastViewedAt *time.Time `json:"lastViewedAt"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-// FileMetadata media metadata content
-type FileMetadata struct {
 }
