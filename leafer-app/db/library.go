@@ -14,8 +14,8 @@ func NewLibraryStore(db *gorm.DB) LibraryStore {
 	return LibraryStore{DB: db}
 }
 
-// FindLibraries returns all libraries in the db
-func (s LibraryStore) FindLibraries() ([]Library, error) {
+// Find returns all libraries in the db
+func (s LibraryStore) Find() ([]Library, error) {
 	var libraries []Library
 	query := s.DB.Find(&libraries)
 	if query.Error != nil {
@@ -25,8 +25,8 @@ func (s LibraryStore) FindLibraries() ([]Library, error) {
 	return libraries, query.Error
 }
 
-// GetLibrary returns the library with the given id
-func (s LibraryStore) GetLibrary(id uint) (*Library, error) {
+// Get returns the library with the given id
+func (s LibraryStore) Get(id uint) (*Library, error) {
 	var library Library
 	query := s.DB.First(&library, id)
 	if query.Error != nil {
@@ -36,8 +36,8 @@ func (s LibraryStore) GetLibrary(id uint) (*Library, error) {
 	return &library, query.Error
 }
 
-// CreateLibrary adds new library in db and returns it
-func (s LibraryStore) CreateLibrary(name string, path string) (*Library, error) {
+// Create adds new library in db and returns it
+func (s LibraryStore) Create(name string, path string) (*Library, error) {
 	library := Library{Name: name, Path: path}
 	query := s.DB.Create(&library)
 	if query.Error != nil {
@@ -52,8 +52,8 @@ func (s LibraryStore) CreateLibrary(name string, path string) (*Library, error) 
 	return &library, nil
 }
 
-// DeleteLibrary delete the library and its medias
-func (s LibraryStore) DeleteLibrary(id uint) error {
+// Delete delete the library and its medias
+func (s LibraryStore) Delete(id uint) error {
 	err := DeleteMediasLibrary(s.DB, id)
 	if err != nil {
 		return err

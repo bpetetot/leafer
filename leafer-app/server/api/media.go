@@ -13,54 +13,42 @@ import (
 )
 
 // SearchMedia search media corresponding to given query parameters
-// valid query parameters are:
-// - libraryId
-// - parentMediaId
-// - mediaType
-// - mediaIndex
 func SearchMedia(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewMediaStore(conn)
+	inputs := db.SearchMediaInputs{
+		LibraryID:     c.Query("libraryId"),
+		ParentMediaID: c.Query("parentMediaId"),
+		MediaType:     c.Query("mediaType"),
+		MediaIndex:    c.Query("mediaIndex"),
+	}
 
-	var libraryID = c.Query("libraryId")
-	if libraryID == "" {
+	if inputs.LibraryID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "LibraryId is mandatory"})
 		return
 	}
-	conn = conn.Where("library_id = ?", libraryID)
 
-	var parentMediaID = c.Query("parentMediaId")
-	if parentMediaID != "" {
-		conn = conn.Where("parent_media_id = ?", parentMediaID)
-	}
-
-	var mediaType = c.Query("mediaType")
-	if mediaType != "" {
-		conn = conn.Where("type = ?", mediaType)
-	}
-
-	var mediaIndex = c.Query("mediaIndex")
-	if mediaIndex != "" {
-		conn = conn.Where("media_index = ?", mediaIndex)
-	}
-
-	var medias []db.Media
-	var queryMedia = conn.Order("mediaIndex").Find(&medias)
-	if queryMedia.Error != nil {
+	medias, err := store.Search(inputs)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "error searching for media"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"data": medias})
 }
 
-// GetMedia get media info dependening on its type
-func GetMedia(c *gin.Context) {
+// FindMedia get media info
+func FindMedia(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewMediaStore(conn)
 
-	var id = c.Param("id")
-	var media db.Media
-	var queryMedia = conn.First(&media, id)
-	if queryMedia.Error != nil {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
+
+	media, err := store.GetMedia(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
 		return
 	}
@@ -71,12 +59,17 @@ func GetMedia(c *gin.Context) {
 // GetMediaContent return the media content
 func GetMediaContent(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewMediaStore(conn)
 
-	var id = c.Param("id")
-	var media db.Media
-	var queryMedia = conn.First(&media, id)
-	if queryMedia.Error != nil || media.Type == "COLLECTION" {
-		c.JSON(http.StatusNotFound, gin.H{"error": "media content not found"})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
+
+	media, err := store.GetMedia(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
 		return
 	}
 
@@ -99,16 +92,26 @@ func GetMediaContent(c *gin.Context) {
 // MarkMediaAsRead mark media as read
 func MarkMediaAsRead(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewMediaStore(conn)
 
-	var id = c.Param("id")
-	var media db.Media
-	var queryMedia = conn.First(&media, id)
-	if queryMedia.Error != nil {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
+
+	media, err := store.GetMedia(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
 		return
 	}
 
-	conn.Model(&media).Update("LastViewedAt", time.Now())
+	viewedAt := time.Now()
+	err = store.UpdateLastViewed(uint(id), &viewedAt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
 
 	c.JSON(http.StatusOK, media)
 }
@@ -116,16 +119,25 @@ func MarkMediaAsRead(c *gin.Context) {
 // MarkMediaAsUnread mark media as read
 func MarkMediaAsUnread(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
+	store := db.NewMediaStore(conn)
 
-	var id = c.Param("id")
-	var media db.Media
-	var queryMedia = conn.First(&media, id)
-	if queryMedia.Error != nil {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id is not a valid integer"})
+		return
+	}
+
+	media, err := store.GetMedia(uint(id))
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "media not found"})
 		return
 	}
 
-	conn.Model(&media).Update("LastViewedAt", nil)
+	err = store.UpdateLastViewed(uint(id), nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
 
 	c.JSON(http.StatusOK, media)
 }

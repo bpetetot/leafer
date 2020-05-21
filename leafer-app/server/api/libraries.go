@@ -21,7 +21,7 @@ type CreateLibraryInput struct {
 func ListLibraries(c *gin.Context) {
 	conn := c.MustGet("db").(*gorm.DB)
 	store := db.NewLibraryStore(conn)
-	libraries, err := store.FindLibraries()
+	libraries, err := store.Find()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
@@ -40,7 +40,7 @@ func FindLibrary(c *gin.Context) {
 	}
 
 	store := db.NewLibraryStore(conn)
-	library, err := store.GetLibrary(uint(id))
+	library, err := store.Get(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
 		return
@@ -61,7 +61,7 @@ func CreateLibrary(c *gin.Context) {
 
 	store := db.NewLibraryStore(conn)
 
-	library, err := store.CreateLibrary(input.Name, input.Path)
+	library, err := store.Create(input.Name, input.Path)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
@@ -82,13 +82,13 @@ func DeleteLibrary(c *gin.Context) {
 
 	store := db.NewLibraryStore(conn)
 
-	_, err = store.GetLibrary(uint(id))
+	_, err = store.Get(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
 		return
 	}
 
-	err = store.DeleteLibrary(uint(id))
+	err = store.Delete(uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
@@ -109,7 +109,7 @@ func ScanLibraryAsync(c *gin.Context) {
 
 	store := db.NewLibraryStore(conn)
 
-	library, err := store.GetLibrary(uint(id))
+	library, err := store.Get(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "library not found"})
 		return
