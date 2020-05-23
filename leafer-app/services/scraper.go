@@ -27,18 +27,16 @@ func NewScraperService(DB *gorm.DB) ScraperService {
 func (s *ScraperService) ScrapLibrary(id uint) error {
 	log.Printf("Scan media for library [%v]", id)
 
-	medias, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id)})
+	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: "0"})
 	if err != nil {
 		return err
 	}
 
-	for _, media := range *medias {
-		if media.ParentMediaID == 0 {
-			log.Printf("Scan media collection for %v", media.EstimatedName)
-			found := scrapers.Scrap(media.EstimatedName)
-			found.MediaCount = s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: fmt.Sprint(media.ID)})
-			s.media.Update(media.ID, &found)
-		}
+	for _, media := range *collections {
+		log.Printf("Scan media collection for %v", media.EstimatedName)
+		found := scrapers.Scrap(media.EstimatedName)
+		found.MediaCount = s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: fmt.Sprint(media.ID)})
+		s.media.Update(media.ID, &found)
 	}
 	return nil
 }

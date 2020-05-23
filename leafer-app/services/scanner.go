@@ -37,20 +37,25 @@ func (s *ScannerService) ScanLibrary(id uint) error {
 	}
 
 	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
-	s.media.DeleteMediasLibrary(library.ID)
-	s.scanDirectory(library.Path, library, nil, 0)
+	err = s.media.DeleteMediasLibrary(library.ID)
+	if err != nil {
+		return err
+	}
+
+	s.scanDirectory(library.Path, library, nil)
 	return nil
 }
 
-func (s *ScannerService) scanDirectory(path string, library *db.Library, parentMedia *db.Media, mediaIndex int) int {
+func (s *ScannerService) scanDirectory(path string, library *db.Library, parentMedia *db.Media) {
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		return 0
+		return
 	}
 
 	utils.SortFiles(files)
+	mediaIndex := 0
 	for _, file := range files {
-		if file.Name()[0:1] == "." {
+		if utils.IsHidden(file.Name()) {
 			continue
 		}
 
@@ -59,14 +64,13 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 			collection := s.createCollection(newPath, file, library)
 			if collection != nil {
 				log.Printf("Scanning [%s]", newPath)
-				s.scanDirectory(newPath, library, collection, 0)
+				s.scanDirectory(newPath, library, collection)
 			}
 		} else {
 			mediaIndex++
 			s.createMedia(newPath, file, library, parentMedia, mediaIndex)
 		}
 	}
-	return mediaIndex
 }
 
 func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) *db.Media {

@@ -22,8 +22,9 @@ func ListImages(src string) ([]string, error) {
 	defer reader.Close()
 
 	for _, file := range reader.File {
-		ext := filepath.Ext(file.Name)
-		matched := utils.Contains(extensions, ext)
+		info := file.FileInfo()
+		ext := filepath.Ext(info.Name())
+		matched := utils.Contains(extensions, ext) && !utils.IsHidden(info.Name()) && !info.IsDir()
 
 		if !matched {
 			continue
@@ -43,7 +44,8 @@ func StreamImage(src string, index int, w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if index >= len(filenames) || index < 0 {
+
+	if index < 0 || index >= len(filenames) {
 		return errors.New("index not found")
 	}
 
