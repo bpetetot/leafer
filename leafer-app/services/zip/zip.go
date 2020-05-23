@@ -1,38 +1,60 @@
 package zip
 
 import (
-	"archive/zip"
 	"errors"
 	"io"
 	"path/filepath"
+	"sort"
 
 	"github.com/mholt/archiver/v3"
 
 	"github.com/bpetetot/leafer/services/utils"
 )
 
-var z = archiver.Zip{
-	ContinueOnError: true,
+var zipArchiver = archiver.Zip{ContinueOnError: true}
+var rarArchiver = archiver.Rar{ContinueOnError: true}
+
+var zipExt = []string{".zip", ".cbz"}
+var rarExt = []string{".rar", ".cbr"}
+var imageExt = []string{".jpg", ".jpeg", ".png", ".bmp", ".gif"}
+
+// ArchiveExt contains handled archive extensions
+var ArchiveExt = append(zipExt, rarExt...)
+
+type fileArchiver interface {
+	Walk(archive string, walkFn archiver.WalkFunc) error
+}
+
+func getFileArchiver(src string) (fileArchiver, error) {
+	ext := filepath.Ext(src)
+	if utils.Contains(zipExt, ext) {
+		return &zipArchiver, nil
+	}
+	if utils.Contains(rarExt, ext) {
+		return &rarArchiver, nil
+	}
+	return nil, errors.New("No archiver found for file extension")
 }
 
 // ListImages will list all images within the zip archive
 func ListImages(src string) ([]string, error) {
-	var extensions = []string{".jpg", ".jpeg", ".png", ".bmp", ".gif"}
 	var filenames []string
+	fileArchiver, err := getFileArchiver(src)
+	if err != nil {
+		return filenames, err
+	}
 
-	err := z.Walk(src, func(f archiver.File) error {
-		zfh, ok := f.Header.(zip.FileHeader)
-		if ok {
-			info := zfh.FileInfo()
-			ext := filepath.Ext(info.Name())
-			matched := utils.Contains(extensions, ext) && !utils.IsHidden(info.Name()) && !info.IsDir()
-
-			if matched {
-				filenames = append(filenames, zfh.Name)
-			}
+	err = fileArchiver.Walk(src, func(f archiver.File) error {
+		name := f.Name()
+		ext := filepath.Ext(name)
+		matched := utils.Contains(imageExt, ext) && !utils.IsHidden(name) && !f.IsDir()
+		if matched {
+			filenames = append(filenames, name)
 		}
 		return nil
 	})
+
+	sort.Sort(utils.Natural(filenames))
 
 	return filenames, err
 }
@@ -49,9 +71,13 @@ func StreamImage(src string, index int, w io.Writer) error {
 		return errors.New("index not found")
 	}
 
-	err = z.Walk(src, func(f archiver.File) error {
-		zfh, ok := f.Header.(zip.FileHeader)
-		if ok && zfh.Name == filenames[index] {
+	fileArchiver, err := getFileArchiver(src)
+	if err != nil {
+		return err
+	}
+
+	err = fileArchiver.Walk(src, func(f archiver.File) error {
+		if f.Name() == filenames[index] {
 			_, err = io.Copy(w, f)
 			return err
 		}

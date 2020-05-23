@@ -4,10 +4,34 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/mholt/archiver/v3"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListImages(t *testing.T) {
+func Test_getFileArchiver(t *testing.T) {
+	assert := assert.New(t)
+
+	t.Run("should return the ZIP archiver for zip extensions", func(t *testing.T) {
+		fileArchiver, _ := getFileArchiver("file.zip")
+		assert.IsType(&archiver.Zip{}, fileArchiver)
+		fileArchiver, _ = getFileArchiver("file.cbz")
+		assert.IsType(&archiver.Zip{}, fileArchiver)
+	})
+
+	t.Run("should return the RAR archiver for rar extensions", func(t *testing.T) {
+		fileArchiver, _ := getFileArchiver("file.rar")
+		assert.IsType(&archiver.Rar{}, fileArchiver)
+		fileArchiver, _ = getFileArchiver("file.cbr")
+		assert.IsType(&archiver.Rar{}, fileArchiver)
+	})
+
+	t.Run("should return an error if no archiver found for unknown extension", func(t *testing.T) {
+		_, err := getFileArchiver("file.bob")
+		assert.Error(err)
+	})
+}
+
+func Test_ListImages(t *testing.T) {
 	assert := assert.New(t)
 
 	t.Run("should return an error if archive doesn't exist", func(t *testing.T) {
@@ -22,7 +46,7 @@ func TestListImages(t *testing.T) {
 	})
 }
 
-func TestStreamImage(t *testing.T) {
+func Test_StreamImage(t *testing.T) {
 	assert := assert.New(t)
 
 	t.Run("should return an error if archive doesn't exist", func(t *testing.T) {

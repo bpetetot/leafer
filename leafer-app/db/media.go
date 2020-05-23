@@ -11,7 +11,7 @@ type MediaStore interface {
 	Get(id uint) (*Media, error)
 	Search(inputs SearchMediaInputs) (*[]Media, error)
 	CountSearch(inputs SearchMediaInputs) int
-	Create(media *Media) error
+	Create(media *Media) (*Media, error)
 	Update(id uint, media *Media) error
 	UpdateLastViewed(id uint, when *time.Time) error
 	DeleteMediasLibrary(id uint) error
@@ -84,9 +84,17 @@ func (r *mediaRepo) CountSearch(inputs SearchMediaInputs) int {
 }
 
 // Create creates the media
-func (r *mediaRepo) Create(media *Media) error {
-	query := r.DB.Create(media)
-	return query.Error
+func (r *mediaRepo) Create(media *Media) (*Media, error) {
+	query := r.DB.Create(&media)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	query = r.DB.Last(&media)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return media, nil
 }
 
 // Update updates the media

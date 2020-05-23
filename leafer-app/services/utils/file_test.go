@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsHidden(t *testing.T) {
+func Test_IsHidden(t *testing.T) {
 	result := IsHidden("file.txt")
 	assert.Equal(t, false, result, "should not be a hidden file")
 

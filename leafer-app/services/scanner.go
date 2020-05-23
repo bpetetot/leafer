@@ -53,43 +53,42 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 	}
 
 	utils.SortFiles(files)
-	mediaIndex := 0
+	mediaIndex := 1
 	for _, file := range files {
-		if utils.IsHidden(file.Name()) {
+		filename := file.Name()
+		if utils.IsHidden(filename) {
 			continue
 		}
 
-		newPath := filepath.Join(path, file.Name())
+		newPath := filepath.Join(path, filename)
 		if file.IsDir() {
-			collection := s.createCollection(newPath, file, library)
+			collection, _ := s.createCollection(newPath, file, library)
 			if collection != nil {
 				log.Printf("Scanning [%s]", newPath)
 				s.scanDirectory(newPath, library, collection)
 			}
 		} else {
-			mediaIndex++
-			s.createMedia(newPath, file, library, parentMedia, mediaIndex)
+			ext := filepath.Ext(filename)
+			if utils.Contains(zip.ArchiveExt, ext) {
+				_, err = s.createMedia(newPath, file, library, parentMedia, mediaIndex)
+				if err == nil {
+					mediaIndex++
+				}
+			}
 		}
 	}
 }
 
-func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) *db.Media {
-	collection := db.Media{
+func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) (*db.Media, error) {
+	return s.media.Create(&db.Media{
 		Type:          "COLLECTION",
 		Library:       library,
 		Path:          path,
 		EstimatedName: info.Name(),
-	}
-	s.media.Create(&collection)
-	return &collection
+	})
 }
 
-func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int) {
-	matched, err := filepath.Match("*.zip", info.Name())
-	if !matched || err != nil {
-		return
-	}
-
+func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int) (*db.Media, error) {
 	// get basic file info
 	basename := info.Name()
 	extension := filepath.Ext(basename)
@@ -97,9 +96,12 @@ func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.
 	volume, _ := strconv.Atoi(getVolumeNumber(name))
 
 	// get media info from file
-	zipFilesList, _ := zip.ListImages(path)
+	zipFilesList, err := zip.ListImages(path)
+	if err != nil {
+		return nil, err
+	}
 
-	s.media.Create(&db.Media{
+	return s.media.Create(&db.Media{
 		Type:          "MEDIA",
 		Library:       library,
 		ParentMedia:   collection,
@@ -116,6 +118,9 @@ func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.
 func getVolumeNumber(filename string) string {
 	re := regexp.MustCompile(`\d+`)
 	numbers := re.FindAllString(filename, -1)
+	if len(numbers) == 0 {
+		return "0"
+	}
 	return numbers[len(numbers)-1]
 }
 
