@@ -39,7 +39,7 @@ func (s *MediaService) StreamMediaPage(id uint, pageIndex int, w io.Writer) erro
 		return err
 	}
 
-	err = zip.StreamImage(media.Path, pageIndex, w)
+	err = zip.ExtractImage(media.Path, pageIndex, w)
 	if err != nil {
 		return err
 	}

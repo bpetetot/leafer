@@ -55,14 +55,14 @@ func main() {
 			Action: func(c *cli.Context) error {
 				DB := db.Setup()
 				scanner := services.NewScannerService(DB)
-				scraper := services.NewScraperService(DB)
+				metadata := services.NewMetadataService(DB)
 
 				err := scanner.ScanLibrary(1)
 				if err != nil {
 					return err
 				}
 
-				err = scraper.ScrapLibrary(1)
+				err = metadata.ScanLibrary(1)
 				if err != nil {
 					return err
 				}

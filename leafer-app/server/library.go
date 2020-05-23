@@ -11,17 +11,17 @@ import (
 
 // LibraryHandlers handles libraries route
 type LibraryHandlers struct {
-	library services.LibraryService
-	scanner services.ScannerService
-	scraper services.ScraperService
+	library  services.LibraryService
+	scanner  services.ScannerService
+	metadata services.MetadataService
 }
 
 // NewLibraryHandlers creates a library handlers instance
 func NewLibraryHandlers(DB *gorm.DB) LibraryHandlers {
 	return LibraryHandlers{
-		library: services.NewLibraryService(DB),
-		scanner: services.NewScannerService(DB),
-		scraper: services.NewScraperService(DB),
+		library:  services.NewLibraryService(DB),
+		scanner:  services.NewScannerService(DB),
+		metadata: services.NewMetadataService(DB),
 	}
 }
 
@@ -102,7 +102,7 @@ func (h *LibraryHandlers) Scan(c *gin.Context) {
 
 	go func(id uint) {
 		h.scanner.ScanLibrary(id)
-		h.scraper.ScrapLibrary(id)
+		h.metadata.ScanLibrary(id)
 	}(uint(id))
 
 	c.JSON(http.StatusOK, gin.H{"status": "OK"})

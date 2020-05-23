@@ -59,9 +59,26 @@ func ListImages(src string) ([]string, error) {
 	return filenames, err
 }
 
-// StreamImage Unzip a specific image in the archive and stream it to the
-// given io.Writer
-func StreamImage(src string, index int, w io.Writer) error {
+func extractFile(src string, filename string, w io.Writer) error {
+	fileArchiver, err := getFileArchiver(src)
+	if err != nil {
+		return err
+	}
+
+	err = fileArchiver.Walk(src, func(f archiver.File) error {
+		if f.Name() == filename {
+			_, err = io.Copy(w, f)
+			return err
+		}
+		return nil
+	})
+
+	return nil
+}
+
+// ExtractImage extracts a specific image index in the archive
+// and stream it to the given io.Writer
+func ExtractImage(src string, index int, w io.Writer) error {
 	filenames, err := ListImages(src)
 	if err != nil {
 		return err
@@ -71,18 +88,5 @@ func StreamImage(src string, index int, w io.Writer) error {
 		return errors.New("index not found")
 	}
 
-	fileArchiver, err := getFileArchiver(src)
-	if err != nil {
-		return err
-	}
-
-	err = fileArchiver.Walk(src, func(f archiver.File) error {
-		if f.Name() == filenames[index] {
-			_, err = io.Copy(w, f)
-			return err
-		}
-		return nil
-	})
-
-	return nil
+	return extractFile(src, filenames[index], w)
 }

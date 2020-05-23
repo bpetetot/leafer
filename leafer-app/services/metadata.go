@@ -9,22 +9,22 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// ScraperService exposes service to scan a library
-type ScraperService struct {
+// MetadataService exposes service to scan a library
+type MetadataService struct {
 	library db.LibraryStore
 	media   db.MediaStore
 }
 
-// NewScraperService creates a library scanner service instance
-func NewScraperService(DB *gorm.DB) ScraperService {
-	return ScraperService{
+// NewMetadataService creates a library scanner service instance
+func NewMetadataService(DB *gorm.DB) MetadataService {
+	return MetadataService{
 		library: db.NewLibraryStore(DB),
 		media:   db.NewMediaStore(DB),
 	}
 }
 
-// ScrapLibrary scans the given library id
-func (s *ScraperService) ScrapLibrary(id uint) error {
+// ScanLibrary scans the given library id
+func (s *MetadataService) ScanLibrary(id uint) error {
 	log.Printf("Scan media for library [%v]", id)
 
 	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: "0"})

@@ -46,26 +46,26 @@ func Test_ListImages(t *testing.T) {
 	})
 }
 
-func Test_StreamImage(t *testing.T) {
+func Test_ExtractImage(t *testing.T) {
 	assert := assert.New(t)
 
 	t.Run("should return an error if archive doesn't exist", func(t *testing.T) {
 		var b bytes.Buffer
-		err := StreamImage("testdata/unknown.zip", 0, &b)
+		err := ExtractImage("testdata/unknown.zip", 0, &b)
 		assert.Error(err)
 	})
 
 	t.Run("should return an error if index doesn't exist", func(t *testing.T) {
 		var b bytes.Buffer
-		err := StreamImage("testdata/archive.zip", -1, &b)
+		err := ExtractImage("testdata/archive.zip", -1, &b)
 		assert.Error(err)
-		err = StreamImage("testdata/archive.zip", 6, &b)
+		err = ExtractImage("testdata/archive.zip", 6, &b)
 		assert.Error(err)
 	})
 
 	t.Run("should copy the image of the given index in the writer", func(t *testing.T) {
 		var b bytes.Buffer
-		err := StreamImage("testdata/archive.zip", 1, &b)
+		err := ExtractImage("testdata/archive.zip", 1, &b)
 		assert.NoError(err)
 		actual := b.String()
 		assert.Equal("test2", actual)
