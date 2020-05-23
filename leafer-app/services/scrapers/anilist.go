@@ -53,7 +53,7 @@ func getTitle(title resultMediaTitle) string {
 		return title.English
 	} else if title.UserPreferred != "" {
 		return title.UserPreferred
-	} else if title.UserPreferred != "" {
+	} else if title.Romaji != "" {
 		return title.Romaji
 	}
 	return title.Native
