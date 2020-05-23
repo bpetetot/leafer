@@ -5,13 +5,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
 
 	"github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/services/comicfile"
 	"github.com/bpetetot/leafer/services/utils"
-	"github.com/bpetetot/leafer/services/zip"
 	"github.com/jinzhu/gorm"
 )
 
@@ -69,7 +66,7 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 			}
 		} else {
 			ext := filepath.Ext(filename)
-			if utils.Contains(zip.ArchiveExt, ext) {
+			if utils.Contains(comicfile.ArchiveExt, ext) {
 				_, err = s.createMedia(newPath, file, library, parentMedia, mediaIndex)
 				if err == nil {
 					mediaIndex++
@@ -81,50 +78,20 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 
 func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) (*db.Media, error) {
 	return s.media.Create(&db.Media{
-		Type:          "COLLECTION",
-		Library:       library,
-		Path:          path,
-		EstimatedName: info.Name(),
+		Type:     "COLLECTION",
+		Library:  library,
+		Path:     path,
+		FileName: info.Name(),
 	})
 }
 
 func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int) (*db.Media, error) {
-	// get basic file info
-	basename := info.Name()
-	extension := filepath.Ext(basename)
-	name := strings.TrimSuffix(basename, extension)
-	volume, _ := strconv.Atoi(getVolumeNumber(name))
-
-	// get media info from file
-	zipFilesList, err := zip.ListImages(path)
-	if err != nil {
-		return nil, err
-	}
-
 	return s.media.Create(&db.Media{
-		Type:          "MEDIA",
-		Library:       library,
-		ParentMedia:   collection,
-		Path:          path,
-		MediaIndex:    mediaIndex,
-		EstimatedName: getVolumeName(name),
-		FileName:      basename,
-		FileExtension: extension,
-		Volume:        volume,
-		PageCount:     len(zipFilesList),
+		Type:        "MEDIA",
+		Library:     library,
+		ParentMedia: collection,
+		Path:        path,
+		FileName:    info.Name(),
+		MediaIndex:  mediaIndex,
 	})
-}
-
-func getVolumeNumber(filename string) string {
-	re := regexp.MustCompile(`\d+`)
-	numbers := re.FindAllString(filename, -1)
-	if len(numbers) == 0 {
-		return "0"
-	}
-	return numbers[len(numbers)-1]
-}
-
-func getVolumeName(filename string) string {
-	number := getVolumeNumber(filename)
-	return strings.Replace(filename, number, "", -1)
 }

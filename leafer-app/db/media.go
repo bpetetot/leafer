@@ -14,6 +14,7 @@ type MediaStore interface {
 	Create(media *Media) (*Media, error)
 	Update(id uint, media *Media) error
 	UpdateLastViewed(id uint, when *time.Time) error
+	Delete(id uint) error
 	DeleteMediasLibrary(id uint) error
 }
 
@@ -106,6 +107,12 @@ func (r *mediaRepo) Update(id uint, media *Media) error {
 // UpdateLastViewed sets the last viewed value of the media
 func (r *mediaRepo) UpdateLastViewed(id uint, when *time.Time) error {
 	query := r.DB.Model(Media{ID: id}).Update("LastViewedAt", when)
+	return query.Error
+}
+
+// Delete deletes the media
+func (r *mediaRepo) Delete(id uint) error {
+	query := r.DB.Unscoped().Where("ID = ?", id).Delete(&Media{})
 	return query.Error
 }
 

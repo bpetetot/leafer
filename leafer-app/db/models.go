@@ -32,12 +32,10 @@ type Media struct {
 	BannerImage string `json:"bannerImage,omitempty"`
 	Score       int    `json:"averageScore,omitempty"`
 
-	EstimatedName string `json:"estimatedName,omitempty"`
-	Volume        int    `json:"volume,omitempty"`
-	FileName      string `json:"fileName,omitempty"`
-	FileExtension string `json:"fileExtention,omitempty"`
-	PageCount     int    `json:"pageCount,omitempty"`
-	MediaIndex    int    `json:"mediaIndex,omitempty"`
+	Volume     int    `json:"volume,omitempty"`
+	FileName   string `json:"fileName,omitempty"`
+	PageCount  int    `json:"pageCount,omitempty"`
+	MediaIndex int    `json:"mediaIndex,omitempty"`
 
 	MediaCount int `json:"mediaCount,omitempty"`
 

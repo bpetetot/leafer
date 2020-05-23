@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 
 	"github.com/bpetetot/leafer/db"
-	"github.com/bpetetot/leafer/services/zip"
+	"github.com/bpetetot/leafer/services/comicfile"
 )
 
 // MediaService gives access to media services
@@ -39,7 +39,12 @@ func (s *MediaService) StreamMediaPage(id uint, pageIndex int, w io.Writer) erro
 		return err
 	}
 
-	err = zip.ExtractImage(media.Path, pageIndex, w)
+	comic, err := comicfile.New(media.Path)
+	if err != nil {
+		return err
+	}
+
+	err = comic.ExtractImage(pageIndex, w)
 	if err != nil {
 		return err
 	}

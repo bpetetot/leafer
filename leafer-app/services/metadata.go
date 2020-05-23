@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/services/comicfile"
 	"github.com/bpetetot/leafer/services/scrapers"
 	"github.com/jinzhu/gorm"
 )
@@ -25,18 +26,42 @@ func NewMetadataService(DB *gorm.DB) MetadataService {
 
 // ScanLibrary scans the given library id
 func (s *MetadataService) ScanLibrary(id uint) error {
-	log.Printf("Scan media for library [%v]", id)
+	log.Printf("Scan metadata library [%v]", id)
 
 	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: "0"})
 	if err != nil {
 		return err
 	}
 
-	for _, media := range *collections {
-		log.Printf("Scan media collection for %v", media.EstimatedName)
-		found := scrapers.Scrap(media.EstimatedName)
-		found.MediaCount = s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: fmt.Sprint(media.ID)})
-		s.media.Update(media.ID, &found)
+	for _, collection := range *collections {
+		log.Printf("Metadata collection [%v]", collection.Path)
+
+		medias, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: fmt.Sprint(collection.ID)})
+		if err != nil {
+			return err
+		}
+
+		for _, media := range *medias {
+			comic, err := comicfile.New(media.Path)
+			if err != nil {
+				s.media.Delete(media.ID)
+				continue
+			}
+			metadata, err := comic.ExtractMetadata()
+			if err != nil {
+				continue
+			}
+
+			// Media metadata
+			media.PageCount = metadata.PageCount
+			media.Volume = metadata.Volume
+			s.media.Update(media.ID, &media)
+		}
+
+		// Collection metadata
+		collectionScrapped := scrapers.Scrap(collection.FileName)
+		collectionScrapped.MediaCount = len(*medias)
+		s.media.Update(collection.ID, &collectionScrapped)
 	}
 	return nil
 }
