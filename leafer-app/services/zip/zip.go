@@ -5,36 +5,36 @@ import (
 	"errors"
 	"io"
 	"path/filepath"
-	"sort"
+
+	"github.com/mholt/archiver/v3"
 
 	"github.com/bpetetot/leafer/services/utils"
 )
+
+var z = archiver.Zip{
+	ContinueOnError: true,
+}
 
 // ListImages will list all images within the zip archive
 func ListImages(src string) ([]string, error) {
 	var extensions = []string{".jpg", ".jpeg", ".png", ".bmp", ".gif"}
 	var filenames []string
 
-	reader, err := zip.OpenReader(src)
-	if err != nil {
-		return filenames, err
-	}
-	defer reader.Close()
+	err := z.Walk(src, func(f archiver.File) error {
+		zfh, ok := f.Header.(zip.FileHeader)
+		if ok {
+			info := zfh.FileInfo()
+			ext := filepath.Ext(info.Name())
+			matched := utils.Contains(extensions, ext) && !utils.IsHidden(info.Name()) && !info.IsDir()
 
-	for _, file := range reader.File {
-		info := file.FileInfo()
-		ext := filepath.Ext(info.Name())
-		matched := utils.Contains(extensions, ext) && !utils.IsHidden(info.Name()) && !info.IsDir()
-
-		if !matched {
-			continue
+			if matched {
+				filenames = append(filenames, zfh.Name)
+			}
 		}
-		filenames = append(filenames, file.Name)
-	}
+		return nil
+	})
 
-	sort.Sort(utils.Natural(filenames))
-
-	return filenames, nil
+	return filenames, err
 }
 
 // StreamImage Unzip a specific image in the archive and stream it to the
@@ -49,24 +49,14 @@ func StreamImage(src string, index int, w io.Writer) error {
 		return errors.New("index not found")
 	}
 
-	reader, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer reader.Close()
-
-	for _, file := range reader.File {
-		if file.Name == filenames[index] {
-			reader, err := file.Open()
-			if err != nil {
-				return err
-			}
-			defer reader.Close()
-
-			_, err = io.Copy(w, reader)
+	err = z.Walk(src, func(f archiver.File) error {
+		zfh, ok := f.Header.(zip.FileHeader)
+		if ok && zfh.Name == filenames[index] {
+			_, err = io.Copy(w, f)
 			return err
 		}
-	}
+		return nil
+	})
 
 	return nil
 }
