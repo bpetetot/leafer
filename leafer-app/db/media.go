@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -11,6 +12,7 @@ type MediaStore interface {
 	Get(id uint) (*Media, error)
 	Search(inputs SearchMediaInputs) (*[]Media, error)
 	CountSearch(inputs SearchMediaInputs) int
+	GetFirstMediaCollection(libraryID uint, collectionID uint) (*Media, error)
 	Create(media *Media) (*Media, error)
 	Update(id uint, media *Media) error
 	UpdateLastViewed(id uint, when *time.Time) error
@@ -82,6 +84,18 @@ func (r *mediaRepo) CountSearch(inputs SearchMediaInputs) int {
 		return 0
 	}
 	return count
+}
+
+// GetFirstMediaCollection get the first media of a collection
+func (r *mediaRepo) GetFirstMediaCollection(libraryID uint, collectionID uint) (*Media, error) {
+	query := buildSearchQuery(r.DB.Model(Media{}), SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), ParentMediaID: fmt.Sprint(collectionID)})
+
+	var media Media
+	query = query.First(&media)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return &media, nil
 }
 
 // Create creates the media

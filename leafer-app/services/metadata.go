@@ -27,42 +27,57 @@ func NewMetadataService(DB *gorm.DB) MetadataService {
 // ScanLibrary scans the given library id
 func (s *MetadataService) ScanLibrary(id uint) error {
 	log.Printf("Scan metadata library [%v]", id)
+	s.ScanCollectionsLibrary(id)
+	s.ScanMediasLibrary(id)
+	return nil
+}
 
-	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(id), ParentMediaID: "0"})
+// ScanMedia scans metadata for the media
+func (s *MetadataService) ScanMedia(media db.Media) error {
+	log.Printf("Metadata media [%v]", media.Path)
+
+	comic, err := comicfile.New(media.Path)
 	if err != nil {
 		return err
 	}
+	mediaMetadata, err := comic.ExtractMetadata()
+	if err != nil {
+		return err
+	}
+	s.media.Update(media.ID, &mediaMetadata)
 
-	for _, collection := range *collections {
-		s.ScanCollection(collection)
+	// Scrap metadata for standalone media
+	if media.ParentMediaID == 0 {
+		mediaMetadata := scrapers.Scrap(media.FileName)
+		s.media.Update(media.ID, &mediaMetadata)
 	}
 	return nil
 }
 
-// ScanCollection scans metadata for the whole collection and its medias
-func (s *MetadataService) ScanCollection(collection db.Media) error {
-	log.Printf("Metadata collection [%v]", collection.Path)
-
-	medias, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(collection.LibraryID), ParentMediaID: fmt.Sprint(collection.ID)})
+// ScanMediasLibrary scans metadata for all medias of the library
+func (s *MetadataService) ScanMediasLibrary(libraryID uint) error {
+	medias, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), MediaType: "MEDIA"})
 	if err != nil {
 		return err
 	}
-	mediaCount := len(*medias)
-
-	// get metadata for standalone collection
-	if mediaCount == 0 {
-		s.ScanMedia(collection)
-	}
-
-	// Get medias metadata
 	for _, media := range *medias {
 		s.ScanMedia(media)
 	}
+	return nil
+}
+
+// ScanCollection scans metadata for the collection
+func (s *MetadataService) ScanCollection(collection db.Media) error {
+	log.Printf("Metadata collection [%v]", collection.Path)
+
+	// Count medias into the collection
+	mediaCount := s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(collection.LibraryID), ParentMediaID: fmt.Sprint(collection.ID)})
 
 	// Get collection metadata from the first media metadata
+	firstMedia, _ := s.media.GetFirstMediaCollection(collection.LibraryID, collection.ID)
 	collectionUpdated := false
-	if mediaCount > 0 {
-		comic, _ := comicfile.New((*medias)[0].Path)
+	if firstMedia != nil {
+		comic, _ := comicfile.New(firstMedia.Path)
 		collectionMetadata, _ := comic.ExtractMetadata()
 		if collectionMetadata.Title != "" {
 			cover, err := comic.ExtractCover(collection.ID)
@@ -84,16 +99,14 @@ func (s *MetadataService) ScanCollection(collection db.Media) error {
 	return nil
 }
 
-// ScanMedia scans metadata for the media
-func (s *MetadataService) ScanMedia(media db.Media) error {
-	comic, err := comicfile.New(media.Path)
+// ScanCollectionsLibrary scans metadata for all collections of the library
+func (s *MetadataService) ScanCollectionsLibrary(libraryID uint) error {
+	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), MediaType: "COLLECTION"})
 	if err != nil {
 		return err
 	}
-	mediaMetadata, err := comic.ExtractMetadata()
-	if err != nil {
-		return err
+	for _, collection := range *collections {
+		s.ScanCollection(collection)
 	}
-	s.media.Update(media.ID, &mediaMetadata)
 	return nil
 }
