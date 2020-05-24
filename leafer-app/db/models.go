@@ -24,15 +24,15 @@ type Media struct {
 	ParentMediaID uint   `json:"-"`
 	ParentMedia   *Media `json:"-"`
 
-	Title       string `json:"title,omitempty"`
-	Category    string `json:"category,omitempty"`
-	Description string `json:"description,omitempty"`
-	Country     string `json:"countryOfOrigin,omitempty"`
-	CoverImage  string `json:"coverImage,omitempty"`
-	BannerImage string `json:"bannerImage,omitempty"`
-	Volume      int    `json:"volume,omitempty"`
-	Score       int    `json:"averageScore,omitempty"`
-	PageCount   int    `json:"pageCount,omitempty"`
+	Title           string `json:"title,omitempty"`
+	Category        string `json:"category,omitempty"`
+	Description     string `json:"description,omitempty"`
+	Country         string `json:"countryOfOrigin,omitempty"`
+	CoverImageURL   string `json:"coverImageUrl,omitempty"`
+	CoverImageLocal string `json:"coverImageLocal,omitempty"`
+	Volume          int    `json:"volume,omitempty"`
+	Score           int    `json:"averageScore,omitempty"`
+	PageCount       int    `json:"pageCount,omitempty"`
 
 	FileName   string `json:"fileName,omitempty"`
 	MediaIndex int    `json:"mediaIndex,omitempty"`

@@ -1,7 +1,11 @@
 package comicfile
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,6 +14,7 @@ import (
 	"strconv"
 
 	"github.com/mholt/archiver/v3"
+	"github.com/nfnt/resize"
 
 	"github.com/bpetetot/leafer/db"
 	"github.com/bpetetot/leafer/services/comicfile/metadata"
@@ -93,7 +98,7 @@ func (c *ComicFile) ExtractImage(index int, w io.Writer) error {
 	return err
 }
 
-// ExtractMetadata extracts metadata of the comic file into the given io.Writer
+// ExtractMetadata extracts metadata of the comic file
 func (c *ComicFile) ExtractMetadata() (db.Media, error) {
 	basename := filepath.Base(c.filepath)
 	volume := getVolumeNumber(basename)
@@ -118,6 +123,33 @@ func (c *ComicFile) ExtractMetadata() (db.Media, error) {
 	}
 
 	return *media, err
+}
+
+// ExtractCover extracts and resize cover image to be saved
+func (c *ComicFile) ExtractCover(id uint) (string, error) {
+	folder := filepath.Join(".metadata", fmt.Sprint("collection-", id))
+	os.MkdirAll(folder, os.ModePerm)
+
+	buf := new(bytes.Buffer)
+	err := c.ExtractImage(0, buf)
+	if err != nil {
+		return "", err
+	}
+	originalImage, _, err := image.Decode(buf)
+	if err != nil {
+		return "", err
+	}
+	resizedImage := resize.Resize(224, 0, originalImage, resize.Lanczos3)
+
+	coverPath := filepath.Join(folder, "cover.jpg")
+	f, err := os.Create(coverPath)
+	defer f.Close()
+	if err != nil {
+		return "", err
+	}
+
+	err = jpeg.Encode(f, resizedImage, nil)
+	return fmt.Sprint("/metadata/collection-", id, "/cover.jpg"), err
 }
 
 func isImageFile(file os.FileInfo) bool {

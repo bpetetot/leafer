@@ -25,7 +25,7 @@ function MediaDetail() {
         <div style={{ display: 'flex', marginBottom: '1.5rem' }}>
           <div style={{ maxWidth: '20%' }}>
             <img
-              src={media.coverImage}
+              src={media.coverImageUrl || media.coverImageLocal}
               alt={media.title || media.titleNative}
               style={{
                 maxWidth: '100%',

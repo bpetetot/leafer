@@ -23,6 +23,7 @@ func Start() {
 	})
 
 	router.Use(static.Serve("/", static.LocalFile("./web", true)))
+	router.Use(static.Serve("/metadata", static.LocalFile("./.metadata", true)))
 
 	api := router.Group("/api")
 

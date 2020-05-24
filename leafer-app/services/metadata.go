@@ -49,21 +49,30 @@ func (s *MetadataService) ScanCollection(collection db.Media) error {
 	}
 	mediaCount := len(*medias)
 
-	// Get collection metadata from the first media metadata
-	collectionUpdated := false
-	if mediaCount > 0 {
-		comic, _ := comicfile.New((*medias)[0].Path)
-		collectionMetadata, _ := comic.ExtractMetadata()
-		collectionMetadata.MediaCount = mediaCount
-		if collectionMetadata.Title != "" {
-			s.media.Update(collection.ID, &collectionMetadata)
-			collectionUpdated = true
-		}
+	// get metadata for standalone collection
+	if mediaCount == 0 {
+		s.ScanMedia(collection)
 	}
 
 	// Get medias metadata
 	for _, media := range *medias {
 		s.ScanMedia(media)
+	}
+
+	// Get collection metadata from the first media metadata
+	collectionUpdated := false
+	if mediaCount > 0 {
+		comic, _ := comicfile.New((*medias)[0].Path)
+		collectionMetadata, _ := comic.ExtractMetadata()
+		if collectionMetadata.Title != "" {
+			cover, err := comic.ExtractCover(collection.ID)
+			if err == nil {
+				collectionMetadata.CoverImageLocal = cover
+			}
+			collectionMetadata.MediaCount = mediaCount
+			s.media.Update(collection.ID, &collectionMetadata)
+			collectionUpdated = true
+		}
 	}
 
 	// Scrap collection metadata
@@ -79,8 +88,7 @@ func (s *MetadataService) ScanCollection(collection db.Media) error {
 func (s *MetadataService) ScanMedia(media db.Media) error {
 	comic, err := comicfile.New(media.Path)
 	if err != nil {
-		s.media.Delete(media.ID)
-		return nil
+		return err
 	}
 	mediaMetadata, err := comic.ExtractMetadata()
 	if err != nil {

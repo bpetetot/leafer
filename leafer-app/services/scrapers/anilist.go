@@ -33,13 +33,12 @@ func scrapAnilist(search string) db.Media {
 	var media = jsonResult.Data.Media
 
 	return db.Media{
-		Title:       getTitle(media.Title),
-		Description: media.Description,
-		Category:    "MANGA",
-		Country:     media.Country,
-		CoverImage:  media.CoverImage.Large,
-		BannerImage: media.BannerImage,
-		Score:       media.Score,
+		Title:         getTitle(media.Title),
+		Description:   media.Description,
+		Category:      "MANGA",
+		Country:       media.Country,
+		CoverImageURL: media.CoverImage.Large,
+		Score:         media.Score,
 		// Genre:       media.Genres[0],
 		// StartDate:   media.StartDate,
 		// EndDate:     media.EndDate,

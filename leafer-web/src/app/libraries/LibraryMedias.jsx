@@ -23,7 +23,7 @@ function LibraryMedias() {
                 <div
                   style={{
                     height: '224px',
-                    background: `no-repeat url(${media.coverImage})`,
+                    background: `no-repeat url(${media.coverImageUrl || media.coverImageLocal})`,
                     backgroundSize: 'cover',
                   }}
                 />
