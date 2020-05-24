@@ -11,16 +11,14 @@ import (
 
 	"github.com/mholt/archiver/v3"
 
+	"github.com/bpetetot/leafer/db"
+	"github.com/bpetetot/leafer/services/comicfile/metadata"
 	"github.com/bpetetot/leafer/services/utils"
 )
-
-var zipArchiver = archiver.Zip{ContinueOnError: true}
-var rarArchiver = archiver.Rar{ContinueOnError: true}
 
 var zipExt = []string{".zip", ".cbz"}
 var rarExt = []string{".rar", ".cbr"}
 var imageExt = []string{".jpg", ".jpeg", ".png", ".bmp", ".gif"}
-var metadataFiles = []string{"ComicInfo.xml"}
 
 // ArchiveExt contains handled archive extensions
 var ArchiveExt = append(zipExt, rarExt...)
@@ -32,10 +30,10 @@ type fileArchiver interface {
 func getFileArchiver(src string) (fileArchiver, error) {
 	ext := filepath.Ext(src)
 	if utils.Contains(zipExt, ext) {
-		return &zipArchiver, nil
+		return &archiver.Zip{ContinueOnError: true}, nil
 	}
 	if utils.Contains(rarExt, ext) {
-		return &rarArchiver, nil
+		return &archiver.Rar{ContinueOnError: true}, nil
 	}
 	return nil, errors.New("No archiver found for file extension")
 }
@@ -95,34 +93,36 @@ func (c *ComicFile) ExtractImage(index int, w io.Writer) error {
 	return err
 }
 
-// ComicMetadata comic metadata extracted from the file
-type ComicMetadata struct {
-	PageCount int
-	Volume    int
-}
-
 // ExtractMetadata extracts metadata of the comic file into the given io.Writer
-func (c *ComicFile) ExtractMetadata() (ComicMetadata, error) {
+func (c *ComicFile) ExtractMetadata() (db.Media, error) {
 	basename := filepath.Base(c.filepath)
 	volume := getVolumeNumber(basename)
 	pageCount := 0
+
+	var media = &db.Media{}
 	err := c.archiver.Walk(c.filepath, func(f archiver.File) error {
 		if isImageFile(f) {
 			pageCount++
+		} else if metadata.IsMetadataFile(f) {
+			media, _ = metadata.ReadMetadata(f.Name(), f)
 		}
 		return nil
 	})
 
-	return ComicMetadata{PageCount: pageCount, Volume: volume}, err
+	if media.PageCount == 0 {
+		media.PageCount = pageCount
+	}
+
+	if media.Volume == 0 {
+		media.Volume = volume
+	}
+
+	return *media, err
 }
 
 func isImageFile(file os.FileInfo) bool {
 	ext := filepath.Ext(file.Name())
 	return utils.Contains(imageExt, ext) && !utils.IsHidden(file.Name()) && !file.IsDir()
-}
-
-func isMetadataFile(file os.FileInfo) bool {
-	return utils.Contains(metadataFiles, file.Name())
 }
 
 func getVolumeNumber(filename string) int {

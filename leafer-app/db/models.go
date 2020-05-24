@@ -30,11 +30,11 @@ type Media struct {
 	Country     string `json:"countryOfOrigin,omitempty"`
 	CoverImage  string `json:"coverImage,omitempty"`
 	BannerImage string `json:"bannerImage,omitempty"`
+	Volume      int    `json:"volume,omitempty"`
 	Score       int    `json:"averageScore,omitempty"`
+	PageCount   int    `json:"pageCount,omitempty"`
 
-	Volume     int    `json:"volume,omitempty"`
 	FileName   string `json:"fileName,omitempty"`
-	PageCount  int    `json:"pageCount,omitempty"`
 	MediaIndex int    `json:"mediaIndex,omitempty"`
 
 	MediaCount int `json:"mediaCount,omitempty"`

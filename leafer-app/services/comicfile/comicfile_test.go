@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/bpetetot/leafer/db"
 	"github.com/mholt/archiver/v3"
 	"github.com/stretchr/testify/assert"
 )
@@ -83,7 +84,7 @@ func Test_ExtractMetadata(t *testing.T) {
 	t.Run("should return minimal file metadata", func(t *testing.T) {
 		comicFile, _ := New("testdata/archive.zip")
 		metadata, _ := comicFile.ExtractMetadata()
-		assert.Equal(ComicMetadata{PageCount: 5, Volume: 0}, metadata)
+		assert.Equal(db.Media{PageCount: 5, Volume: 0}, metadata)
 	})
 }
 
