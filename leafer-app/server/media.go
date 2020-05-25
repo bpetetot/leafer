@@ -26,10 +26,10 @@ func NewMediaHandlers(DB *gorm.DB) MediaHandlers {
 // Search search media corresponding to given query parameters
 func (h *MediaHandlers) Search(c *gin.Context) {
 	inputs := db.SearchMediaInputs{
-		LibraryID:     c.Query("libraryId"),
-		ParentMediaID: c.Query("parentMediaId"),
-		MediaType:     c.Query("mediaType"),
-		MediaIndex:    c.Query("mediaIndex"),
+		LibraryID:  c.Query("libraryId"),
+		SerieID:    c.Query("serieId"),
+		MediaType:  c.Query("mediaType"),
+		MediaIndex: c.Query("mediaIndex"),
 	}
 
 	if inputs.LibraryID == "" {

@@ -27,7 +27,7 @@ func NewMetadataService(DB *gorm.DB) MetadataService {
 // ScanLibrary scans the given library id
 func (s *MetadataService) ScanLibrary(id uint) error {
 	log.Printf("Scan metadata library [%v]", id)
-	s.ScanCollectionsLibrary(id)
+	s.ScanSeriesLibrary(id)
 	s.ScanMediasLibrary(id)
 	return nil
 }
@@ -47,7 +47,7 @@ func (s *MetadataService) ScanMedia(media db.Media) error {
 	s.media.Update(media.ID, &mediaMetadata)
 
 	// Scrap metadata for standalone media
-	if media.ParentMediaID == 0 {
+	if media.SerieID == 0 {
 		mediaMetadata := scrapers.Scrap(media.FileName)
 		s.media.Update(media.ID, &mediaMetadata)
 	}
@@ -66,47 +66,47 @@ func (s *MetadataService) ScanMediasLibrary(libraryID uint) error {
 	return nil
 }
 
-// ScanCollection scans metadata for the collection
-func (s *MetadataService) ScanCollection(collection db.Media) error {
-	log.Printf("Metadata collection [%v]", collection.Path)
+// ScanSerie scans metadata for the serie
+func (s *MetadataService) ScanSerie(serie db.Media) error {
+	log.Printf("Metadata serie [%v]", serie.Path)
 
-	// Count medias into the collection
-	mediaCount := s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(collection.LibraryID), ParentMediaID: fmt.Sprint(collection.ID)})
+	// Count medias into the serie
+	mediaCount := s.media.CountSearch(db.SearchMediaInputs{LibraryID: fmt.Sprint(serie.LibraryID), SerieID: fmt.Sprint(serie.ID)})
 
-	// Get collection metadata from the first media metadata
-	firstMedia, _ := s.media.GetFirstMediaCollection(collection.LibraryID, collection.ID)
-	collectionUpdated := false
+	// Get serie metadata from the first media metadata
+	firstMedia, _ := s.media.GetFirstMediaSerie(serie.LibraryID, serie.ID)
+	serieUpdated := false
 	if firstMedia != nil {
 		comic, _ := comicfile.New(firstMedia.Path)
-		collectionMetadata, _ := comic.ExtractMetadata()
-		if collectionMetadata.Title != "" {
-			cover, err := comic.ExtractCover(collection.ID)
+		serieMetadata, _ := comic.ExtractMetadata()
+		if serieMetadata.Title != "" {
+			cover, err := comic.ExtractCover(serie.ID)
 			if err == nil {
-				collectionMetadata.CoverImageLocal = cover
+				serieMetadata.CoverImageLocal = cover
 			}
-			collectionMetadata.MediaCount = mediaCount
-			s.media.Update(collection.ID, &collectionMetadata)
-			collectionUpdated = true
+			serieMetadata.MediaCount = mediaCount
+			s.media.Update(serie.ID, &serieMetadata)
+			serieUpdated = true
 		}
 	}
 
-	// Scrap collection metadata
-	if !collectionUpdated {
-		collectionMetadata := scrapers.Scrap(collection.FileName)
-		collectionMetadata.MediaCount = mediaCount
-		s.media.Update(collection.ID, &collectionMetadata)
+	// Scrap serie metadata
+	if !serieUpdated {
+		serieMetadata := scrapers.Scrap(serie.FileName)
+		serieMetadata.MediaCount = mediaCount
+		s.media.Update(serie.ID, &serieMetadata)
 	}
 	return nil
 }
 
-// ScanCollectionsLibrary scans metadata for all collections of the library
-func (s *MetadataService) ScanCollectionsLibrary(libraryID uint) error {
-	collections, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), MediaType: "COLLECTION"})
+// ScanSeriesLibrary scans metadata for all series of the library
+func (s *MetadataService) ScanSeriesLibrary(libraryID uint) error {
+	series, err := s.media.Search(db.SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), MediaType: "SERIE"})
 	if err != nil {
 		return err
 	}
-	for _, collection := range *collections {
-		s.ScanCollection(collection)
+	for _, serie := range *series {
+		s.ScanSerie(serie)
 	}
 	return nil
 }

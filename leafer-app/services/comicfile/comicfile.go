@@ -127,7 +127,7 @@ func (c *ComicFile) ExtractMetadata() (db.Media, error) {
 
 // ExtractCover extracts and resize cover image to be saved
 func (c *ComicFile) ExtractCover(id uint) (string, error) {
-	folder := filepath.Join(".metadata", fmt.Sprint("collection-", id))
+	folder := filepath.Join(".metadata", fmt.Sprint("serie-", id))
 	os.MkdirAll(folder, os.ModePerm)
 
 	buf := new(bytes.Buffer)
@@ -149,7 +149,7 @@ func (c *ComicFile) ExtractCover(id uint) (string, error) {
 	}
 
 	err = jpeg.Encode(f, resizedImage, nil)
-	return fmt.Sprint("/metadata/collection-", id, "/cover.jpg"), err
+	return fmt.Sprint("/metadata/serie-", id, "/cover.jpg"), err
 }
 
 func isImageFile(file os.FileInfo) bool {

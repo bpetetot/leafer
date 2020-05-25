@@ -10,32 +10,32 @@ const MediaHeader = ({ children }) => (
 )
 
 const Breadcrumb = () => {
-  const { libraryId, collectionId, mediaId } = useParams()
+  const { libraryId, serieId, mediaId } = useParams()
 
   const { data: library } = useLibrary(libraryId)
-  const { data: collection } = useMedia(collectionId)
+  const { data: serie } = useMedia(serieId)
   const { data: media } = useMedia(mediaId)
 
   return (
     <ul style={{ display: 'flex' }}>
       {library && (
         <li>
-          {collection ? (
+          {serie ? (
             <Link to={`/library/${libraryId}`}>{library.name}</Link>
           ) : (
             library.name
           )}
         </li>
       )}
-      {collection && (
+      {serie && (
         <li>
           &nbsp;&gt;&nbsp;
           {media ? (
-            <Link to={`/library/${libraryId}/${collectionId}`}>
-              {collection.title}
+            <Link to={`/library/${libraryId}/${serieId}`}>
+              {serie.title}
             </Link>
           ) : (
-            collection.title
+            serie.title
           )}
         </li>
       )}

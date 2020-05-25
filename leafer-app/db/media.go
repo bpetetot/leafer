@@ -12,7 +12,7 @@ type MediaStore interface {
 	Get(id uint) (*Media, error)
 	Search(inputs SearchMediaInputs) (*[]Media, error)
 	CountSearch(inputs SearchMediaInputs) int
-	GetFirstMediaCollection(libraryID uint, collectionID uint) (*Media, error)
+	GetFirstMediaSerie(libraryID uint, serieID uint) (*Media, error)
 	Create(media *Media) (*Media, error)
 	Update(id uint, media *Media) error
 	UpdateLastViewed(id uint, when *time.Time) error
@@ -41,17 +41,17 @@ func (r *mediaRepo) Get(id uint) (*Media, error) {
 
 // SearchMediaInputs represents possible search inputs
 type SearchMediaInputs struct {
-	LibraryID     string
-	ParentMediaID string
-	MediaType     string
-	MediaIndex    string
+	LibraryID  string
+	SerieID    string
+	MediaType  string
+	MediaIndex string
 }
 
 func buildSearchQuery(db *gorm.DB, inputs SearchMediaInputs) *gorm.DB {
 	query := db.Where("library_id = ?", inputs.LibraryID)
 
-	if inputs.ParentMediaID != "" {
-		query = query.Where("parent_media_id = ?", inputs.ParentMediaID)
+	if inputs.SerieID != "" {
+		query = query.Where("serie_id = ?", inputs.SerieID)
 	}
 	if inputs.MediaType != "" {
 		query = query.Where("type = ?", inputs.MediaType)
@@ -86,9 +86,9 @@ func (r *mediaRepo) CountSearch(inputs SearchMediaInputs) int {
 	return count
 }
 
-// GetFirstMediaCollection get the first media of a collection
-func (r *mediaRepo) GetFirstMediaCollection(libraryID uint, collectionID uint) (*Media, error) {
-	query := buildSearchQuery(r.DB.Model(Media{}), SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), ParentMediaID: fmt.Sprint(collectionID)})
+// GetFirstMediaSerie get the first media of a serie
+func (r *mediaRepo) GetFirstMediaSerie(libraryID uint, serieID uint) (*Media, error) {
+	query := buildSearchQuery(r.DB.Model(Media{}), SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), SerieID: fmt.Sprint(serieID)})
 
 	var media Media
 	query = query.First(&media)

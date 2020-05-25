@@ -6,15 +6,15 @@ import { ReactComponent as UnreadIcon } from 'assets/icons/circle.svg'
 
 import { PageContainer } from 'components/Container'
 import { List, ListItem } from 'components/List'
-import { useMedia, useMediasCollection, markAsRead, markAsUnread } from 'services/media'
+import { useMedia, useMediasSerie, markAsRead, markAsUnread } from 'services/media'
 import Text from 'components/Text'
 import { IconButton } from 'components/Button'
 import MediaHeader from '../common/MediaHeader'
 
 function MediaDetail() {
-  let { libraryId, collectionId } = useParams()
-  const { data: media } = useMedia(collectionId)
-  const { data: medias, mutate } = useMediasCollection(libraryId, media)
+  let { libraryId, serieId } = useParams()
+  const { data: media } = useMedia(serieId)
+  const { data: medias, mutate } = useMediasSerie(libraryId, media)
 
   if (!media) return <p>Loading...</p>
 
@@ -58,7 +58,7 @@ function MediaDetail() {
         <List>
           {(medias?.data || [media])?.map((item) => (
             <ListItem key={item.id}>
-              <Link to={`/library/${libraryId}/${collectionId}/${item.id}`}>
+              <Link to={`/library/${libraryId}/${serieId}/${item.id}`}>
                 #{String(item.volume || 0).padStart(3, '0')}{' '}
                 {media.title || media.titleNative}
               </Link>

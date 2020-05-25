@@ -21,8 +21,8 @@ type Media struct {
 	LibraryID uint     `json:"-"`
 	Library   *Library `json:"-"`
 
-	ParentMediaID uint   `json:"-"`
-	ParentMedia   *Media `json:"-"`
+	SerieID uint   `json:"-"`
+	Serie   *Media `json:"-"`
 
 	Title           string `json:"title,omitempty"`
 	Category        string `json:"category,omitempty"`

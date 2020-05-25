@@ -17,7 +17,7 @@ import MediaHeader from '../common/MediaHeader'
 import Reader from './Reader'
 
 function MediaReader() {
-  const { libraryId, collectionId, mediaId } = useParams()
+  const { libraryId, serieId, mediaId } = useParams()
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -42,11 +42,11 @@ function MediaReader() {
 
   const handleChangeMedia = useCallback(
     async (index) => {
-      const next = await fetchMediaByIndex(libraryId, collectionId, index)
+      const next = await fetchMediaByIndex(libraryId, serieId, index)
       if (!next) return
-      navigate(`/library/${libraryId}/${collectionId}/${next.id}?page=0`)
+      navigate(`/library/${libraryId}/${serieId}/${next.id}?page=0`)
     },
-    [collectionId, libraryId, navigate]
+    [serieId, libraryId, navigate]
   )
 
   const onNextPage = () => {

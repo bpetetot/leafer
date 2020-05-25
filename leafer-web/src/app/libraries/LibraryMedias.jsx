@@ -39,7 +39,7 @@ function LibraryMedias() {
                 <Link to={`/library/${libraryId}/${media.id}`}>
                   {media.title}
                 </Link>
-                {media.type === 'COLLECTION' && (
+                {media.type === 'SERIE' && (
                   <Text size="sm">
                     {media.mediaCount} media
                   </Text>

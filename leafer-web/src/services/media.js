@@ -10,29 +10,23 @@ export const useMedia = (mediaId) => {
 }
 
 export const useMediasLibrary = (libraryId) => {
-  return useSWR(libraryId ? [MEDIA, libraryId] : null, (url, libraryId) => {
-    return fetchJSON(`${url}?libraryId=${libraryId}&parentMediaId=0`)
+  return useSWR(libraryId ? [MEDIA, libraryId, 0] : null, (url, libraryId, serieId) => {
+    return fetchJSON(`${url}?libraryId=${libraryId}&serieId=${serieId}`)
   })
 }
 
-export const useMediasCollection = (libraryId, mediaCollection) => {
-  const shouldFetch = mediaCollection && mediaCollection.type === 'COLLECTION'
+export const useMediasSerie = (libraryId, serie) => {
+  const shouldFetch = serie && serie.type === 'SERIE'
   return useSWR(
-    shouldFetch ? [MEDIA, libraryId, mediaCollection.id] : null,
-    (url, libraryId, parentMediaId) => {
-      return fetchJSON(
-        `${url}?libraryId=${libraryId}&parentMediaId=${parentMediaId}`
-      )
+    shouldFetch ? [MEDIA, libraryId, serie.id] : null,
+    (url, libraryId, serieId) => {
+      return fetchJSON(`${url}?libraryId=${libraryId}&serieId=${serieId}`)
     }
   )
 }
 
-export const fetchMediaByIndex = async (
-  libraryId,
-  parentMediaId,
-  mediaIndex
-) => {
-  const url = `${MEDIA}?libraryId=${libraryId}&parentMediaId=${parentMediaId}&mediaIndex=${mediaIndex}`
+export const fetchMediaByIndex = async (libraryId, serieId, mediaIndex) => {
+  const url = `${MEDIA}?libraryId=${libraryId}&serieId=${serieId}&mediaIndex=${mediaIndex}`
   const media = await fetchJSON(url)
   return media?.data?.[0]
 }

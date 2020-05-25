@@ -25,8 +25,8 @@ ReactDOM.render(
             <Route path="/" element={<Libraries />} />
             <Route path="/library/new" element={<NewLibrary />} />
             <Route path="/library/:libraryId" element={<LibraryMedias />} />
-            <Route path="/library/:libraryId/:collectionId" element={<MediaDetail />} />
-            <Route path="/library/:libraryId/:collectionId/:mediaId" element={<MediaReader />} />
+            <Route path="/library/:libraryId/:serieId" element={<MediaDetail />} />
+            <Route path="/library/:libraryId/:serieId/:mediaId" element={<MediaReader />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/*" element={<NotFound />} />
           </Routes>

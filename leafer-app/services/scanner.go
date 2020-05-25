@@ -59,10 +59,10 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 
 		newPath := filepath.Join(path, filename)
 		if file.IsDir() {
-			collection, _ := s.createCollection(newPath, file, library)
-			if collection != nil {
+			serie, _ := s.createSerie(newPath, file, library)
+			if serie != nil {
 				log.Printf("Scanning [%s]", newPath)
-				s.scanDirectory(newPath, library, collection)
+				s.scanDirectory(newPath, library, serie)
 			}
 		} else {
 			ext := filepath.Ext(filename)
@@ -76,22 +76,22 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 	}
 }
 
-func (s *ScannerService) createCollection(path string, info os.FileInfo, library *db.Library) (*db.Media, error) {
+func (s *ScannerService) createSerie(path string, info os.FileInfo, library *db.Library) (*db.Media, error) {
 	return s.media.Create(&db.Media{
-		Type:     "COLLECTION",
+		Type:     "SERIE",
 		Library:  library,
 		Path:     path,
 		FileName: info.Name(),
 	})
 }
 
-func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, collection *db.Media, mediaIndex int) (*db.Media, error) {
+func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, serie *db.Media, mediaIndex int) (*db.Media, error) {
 	return s.media.Create(&db.Media{
-		Type:        "MEDIA",
-		Library:     library,
-		ParentMedia: collection,
-		Path:        path,
-		FileName:    info.Name(),
-		MediaIndex:  mediaIndex,
+		Type:       "MEDIA",
+		Library:    library,
+		Serie:      serie,
+		Path:       path,
+		FileName:   info.Name(),
+		MediaIndex: mediaIndex,
 	})
 }

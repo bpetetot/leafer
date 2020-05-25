@@ -6,10 +6,12 @@ const LIBRARIES = '/api/libraries'
 export const useLibraries = () => useSWR(LIBRARIES)
 
 export const useLibrary = (libraryId) => {
+  console.log({libraryId})
   return useSWR(libraryId ? [LIBRARIES, libraryId] : null, (url, libraryId) => {
     return fetchJSON(`${url}/${libraryId}`)
   })
 }
+
 export const addLibrary = (data) => {
   return mutate(LIBRARIES, async (libraries = []) => {
     const library = await fetchJSON(LIBRARIES, {
@@ -24,7 +26,7 @@ export const addLibrary = (data) => {
 export const removeLibrary = async (id) => {
   return mutate(LIBRARIES, async (libraries = []) => {
     await fetchJSON(`${LIBRARIES}/${id}`, { method: 'DELETE' })
-    return libraries.filter(library => library.id !== id)
+    return libraries.filter((library) => library.id !== id)
   })
 }
 
