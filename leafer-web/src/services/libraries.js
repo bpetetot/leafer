@@ -6,7 +6,6 @@ const LIBRARIES = '/api/libraries'
 export const useLibraries = () => useSWR(LIBRARIES)
 
 export const useLibrary = (libraryId) => {
-  console.log({libraryId})
   return useSWR(libraryId ? [LIBRARIES, libraryId] : null, (url, libraryId) => {
     return fetchJSON(`${url}/${libraryId}`)
   })

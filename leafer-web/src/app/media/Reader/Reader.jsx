@@ -19,7 +19,6 @@ function Reader({
   loadPage,
   onNextPage,
   onPreviousPage,
-  displayMode,
 }) {
   const [page, setPage] = useState(null)
   const cache = useRef([])
@@ -61,12 +60,8 @@ function Reader({
     ...swipeConfig,
   })
 
-  const readerClassNames = cn('reader', {
-    'reader--fit-parent': displayMode === 'fit-parent',
-  })
-
   return (
-    <div className={readerClassNames} {...handlers}>
+    <div className="reader" {...handlers}>
       <div className="page">
         {page ? <img src={page} alt="Page X" /> : <p>Loading page...</p>}
       </div>

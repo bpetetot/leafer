@@ -8684,6 +8684,11 @@ react-swipeable@^5.5.1:
   dependencies:
     prop-types "^15.6.2"
 
+react-use-infinite-loader@^1.0.0-beta.1:
+  version "1.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/react-use-infinite-loader/-/react-use-infinite-loader-1.0.0-beta.1.tgz#4695c34f0666a62208b1879dc7dad72d958a5894"
+  integrity sha512-hO3EA7pRmLgnFjTKTFdOUxQv4/xUNW5+2vP1AxkK+7y+XZQohbuo/O7haW7kvu9q14ZNgE4BTDRpbQ1o66eeSg==
+
 react@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react/-/react-16.13.1.tgz#2e818822f1a9743122c063d6410d85c1e3afe48e"
