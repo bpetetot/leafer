@@ -4,12 +4,13 @@ import "time"
 
 // Library model
 type Library struct {
-	ID        uint      `json:"id" gorm:"primary_key"`
-	Name      string    `json:"name"`
-	Path      string    `json:"path"`
-	Medias    *[]Media  `json:"medias,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID             uint      `json:"id" gorm:"primary_key"`
+	Name           string    `json:"name"`
+	Path           string    `json:"path"`
+	Medias         *[]Media  `json:"medias,omitempty"`
+	ScanningStatus string    `json:"scanningStatus"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 // Media model
@@ -39,7 +40,8 @@ type Media struct {
 
 	MediaCount int `json:"mediaCount,omitempty"`
 
-	LastViewedAt *time.Time `json:"lastViewedAt"`
+	ScanningStatus string     `json:"scanningStatus"`
+	LastViewedAt   *time.Time `json:"lastViewedAt"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

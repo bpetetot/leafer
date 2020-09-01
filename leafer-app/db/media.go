@@ -17,7 +17,10 @@ type MediaStore interface {
 	Update(id uint, media *Media) error
 	UpdateLastViewed(id uint, when *time.Time) error
 	Delete(id uint) error
+	UpdateMediasLibraryScanningStatus(id uint, scanningStatus string) error
 	DeleteMediasLibrary(id uint) error
+	DeleteMediasWithScanningStatus(libraryID uint) error
+	ExistMediaPath(libraryID uint, path string) (*Media, error)
 }
 
 type mediaRepo struct {
@@ -45,6 +48,7 @@ type SearchMediaInputs struct {
 	SerieID    string
 	MediaType  string
 	MediaIndex string
+	Path       string
 }
 
 func buildSearchQuery(db *gorm.DB, inputs SearchMediaInputs) *gorm.DB {
@@ -58,6 +62,9 @@ func buildSearchQuery(db *gorm.DB, inputs SearchMediaInputs) *gorm.DB {
 	}
 	if inputs.MediaIndex != "" {
 		query = query.Where("media_index = ?", inputs.MediaIndex)
+	}
+	if inputs.Path != "" {
+		query = query.Where("path = ?", inputs.Path)
 	}
 	return query
 }
@@ -134,4 +141,28 @@ func (r *mediaRepo) Delete(id uint) error {
 func (r *mediaRepo) DeleteMediasLibrary(id uint) error {
 	query := r.DB.Unscoped().Where("library_id = ?", id).Delete(&Media{})
 	return query.Error
+}
+
+// DeleteMediasWithScanningStatus deletes library's media with "scanning" status
+func (r *mediaRepo) DeleteMediasWithScanningStatus(id uint) error {
+	query := r.DB.Unscoped().Where("library_id = ?", id).Where("scanning_status = ?", "scanning").Delete(&Media{})
+	return query.Error
+}
+
+// Update update all medias library scanning status
+func (r *mediaRepo) UpdateMediasLibraryScanningStatus(id uint, scanningStatus string) error {
+	query := r.DB.Model(&Media{}).Where("library_id = ?", id).Update(&Media{ScanningStatus: scanningStatus})
+	return query.Error
+}
+
+// ExistMediaPath returns the medias if one exists for the library and path
+func (r *mediaRepo) ExistMediaPath(libraryID uint, path string) (*Media, error) {
+	medias, err := r.Search(SearchMediaInputs{LibraryID: fmt.Sprint(libraryID), Path: path})
+	if err != nil {
+		return nil, err
+	}
+	if len(*medias) != 1 {
+		return nil, nil
+	}
+	return &(*medias)[0], nil
 }

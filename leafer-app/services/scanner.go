@@ -34,12 +34,22 @@ func (s *ScannerService) ScanLibrary(id uint) error {
 	}
 
 	log.Printf("Scan files for library '%s' [%s]", library.Name, library.Path)
-	err = s.media.DeleteMediasLibrary(library.ID)
+
+	// Set all current media of the library to "scanning" status
+	err = s.media.UpdateMediasLibraryScanningStatus(library.ID, "scanning")
 	if err != nil {
 		return err
 	}
 
+	// Scan the library directory
 	s.scanDirectory(library.Path, library, nil)
+
+	// Delete all remaining "scanning" status from the library
+	err = s.media.DeleteMediasWithScanningStatus(library.ID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -77,21 +87,41 @@ func (s *ScannerService) scanDirectory(path string, library *db.Library, parentM
 }
 
 func (s *ScannerService) createSerie(path string, info os.FileInfo, library *db.Library) (*db.Media, error) {
-	return s.media.Create(&db.Media{
-		Type:     "SERIE",
-		Library:  library,
-		Path:     path,
-		FileName: info.Name(),
-	})
+	savedMedia := &db.Media{
+		Type:           "SERIE",
+		Library:        library,
+		Path:           path,
+		FileName:       info.Name(),
+		ScanningStatus: "scanned",
+	}
+
+	currentMedia, _ := s.media.ExistMediaPath(library.ID, path)
+	if currentMedia != nil {
+		log.Printf("Updated serie [%s]", path)
+		s.media.Update(currentMedia.ID, savedMedia)
+		return s.media.Get(currentMedia.ID)
+	}
+	log.Printf("Created serie [%s]", path)
+	return s.media.Create(savedMedia)
 }
 
 func (s *ScannerService) createMedia(path string, info os.FileInfo, library *db.Library, serie *db.Media, mediaIndex int) (*db.Media, error) {
-	return s.media.Create(&db.Media{
-		Type:       "MEDIA",
-		Library:    library,
-		Serie:      serie,
-		Path:       path,
-		FileName:   info.Name(),
-		MediaIndex: mediaIndex,
-	})
+	savedMedia := &db.Media{
+		Type:           "MEDIA",
+		Library:        library,
+		Serie:          serie,
+		Path:           path,
+		FileName:       info.Name(),
+		MediaIndex:     mediaIndex,
+		ScanningStatus: "scanned",
+	}
+
+	currentMedia, _ := s.media.ExistMediaPath(library.ID, path)
+	if currentMedia != nil {
+		log.Printf("Updated media [%s]", path)
+		s.media.Update(currentMedia.ID, savedMedia)
+		return s.media.Get(currentMedia.ID)
+	}
+	log.Printf("Created media [%s]", path)
+	return s.media.Create(savedMedia)
 }
