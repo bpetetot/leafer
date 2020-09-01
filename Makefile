@@ -8,6 +8,7 @@ build-server:
 
 pack-final-build:
 	mkdir -p ./build
+	rm -rf ./build/web ./build/leafer
 	mv leafer-web/build ./build/web
 	mv leafer-app/leafer ./build
 	cp leafer-app/.env ./build
